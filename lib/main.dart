@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/pages/login.dart';
+import 'package:my_money/pages/register.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'My Money',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const LoginPage(),
+      home: const RegisterPage(),
     );
   }
 }
