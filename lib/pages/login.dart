@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/components/auth_action_button.dart';
 import 'package:my_money/components/form_login.dart';
-import 'package:my_money/components/nav_auth.dart';
+import 'package:my_money/components/ui/nav_auth.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -9,6 +9,7 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Color(0xFF1E1E1E),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -16,6 +17,7 @@ class LoginPage extends StatelessWidget {
       ),
       body: Column(
         children: [
+          const SizedBox(height: 48),
           LoginForm(
             onLoginPressed: () {
               // Lógica de autenticação vai aqui

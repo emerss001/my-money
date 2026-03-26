@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/components/auth_action_button.dart';
 import 'package:my_money/components/form_register.dart';
-import 'package:my_money/components/nav_auth.dart';
+import 'package:my_money/components/ui/nav_auth.dart';
 
 class RegisterPage extends StatelessWidget {
   const RegisterPage({super.key});
@@ -9,6 +9,7 @@ class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: const Color(0xFF161618), // Fundo principal da tela
       appBar: const PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
@@ -16,6 +17,7 @@ class RegisterPage extends StatelessWidget {
       ),
       body: Column(
         children: [
+          const SizedBox(height: 6),
           RegisterForm(
             onRegisterPressed: () {
               // Lógica de registro vai aqui

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_money/pages/home.dart';
 import 'package:my_money/pages/login.dart';
 import 'package:my_money/pages/register.dart';
 
@@ -14,7 +15,16 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'My Money',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: const Color(
+          0xFF121214,
+        ), // Fundo escuro principal
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF00875F), // Verde principal
+          secondary: Color(0xFF00B37E), // Verde claro
+          surface: Color(0xFF202024), // Fundo dos cards
+        ),
+      ),
       home: const RegisterPage(),
     );
   }
