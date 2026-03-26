@@ -7,6 +7,7 @@ class NavBarAuth extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      // automaticallyImplyLeading: false,
       backgroundColor: Colors.transparent,
       title: Padding(
         padding: const EdgeInsets.only(top: 12.0),

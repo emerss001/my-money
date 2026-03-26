@@ -29,6 +29,7 @@ class LoginPage extends StatelessWidget {
           const AuthActionButton(
             label: "Ainda não tem uma conta?",
             buttonLabel: "Cadastre-se",
+            routeName: "/register",
           ),
         ],
       ),

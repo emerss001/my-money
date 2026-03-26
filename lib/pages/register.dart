@@ -30,6 +30,7 @@ class RegisterPage extends StatelessWidget {
           const AuthActionButton(
             label: "já tem uma conta?",
             buttonLabel: "Acessar",
+            routeName: "/login",
           ),
         ],
       ),

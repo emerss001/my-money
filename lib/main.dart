@@ -13,6 +13,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // Configuração de rotas do app
+      initialRoute: "/",
+      routes: {
+        "/": (context) => const HomePage(),
+        "/login": (context) => const LoginPage(),
+        "/register": (context) => const RegisterPage(),
+      },
       debugShowCheckedModeBanner: false,
       title: 'My Money',
       theme: ThemeData.dark().copyWith(
@@ -25,7 +32,6 @@ class MyApp extends StatelessWidget {
           surface: Color(0xFF202024), // Fundo dos cards
         ),
       ),
-      home: const RegisterPage(),
     );
   }
 }

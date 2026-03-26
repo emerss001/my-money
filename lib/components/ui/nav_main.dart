@@ -35,17 +35,26 @@ class NavBarMain extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () {},
-                child: const Row(
-                  children: [
-                    Icon(Icons.logout, color: Color(0xFF7C7C8A), size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      'Sair da conta',
-                      style: TextStyle(color: Color(0xFF7C7C8A), fontSize: 14),
-                    ),
-                  ],
+              InkWell(
+                onTap: () {
+                  // Ação de sair da conta
+                  Navigator.pushReplacementNamed(context, '/login');
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.logout, color: Color(0xFF7C7C8A), size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        'Sair da conta',
+                        style: TextStyle(
+                          color: Color(0xFF7C7C8A),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

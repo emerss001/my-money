@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class AuthActionButton extends StatelessWidget {
   final String label;
   final String buttonLabel;
+  final String routeName;
 
   const AuthActionButton({
     super.key,
     required this.label,
     required this.buttonLabel,
+    required this.routeName,
   });
 
   @override
@@ -33,7 +35,7 @@ class AuthActionButton extends StatelessWidget {
             child: OutlinedButton(
               onPressed: () {
                 // Lógica de autenticação vai aqui
-                print("Botão de login clicado!");
+                Navigator.pushReplacementNamed(context, routeName);
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(
