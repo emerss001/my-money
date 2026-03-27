@@ -7,6 +7,7 @@ class SummaryCard extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final bool isTotalCard;
+  final Color? customBackgroundColor;
 
   const SummaryCard({
     super.key,
@@ -16,6 +17,7 @@ class SummaryCard extends StatelessWidget {
     required this.icon,
     required this.iconColor,
     this.isTotalCard = false,
+    this.customBackgroundColor,
   });
 
   @override
@@ -24,7 +26,9 @@ class SummaryCard extends StatelessWidget {
       width: 280,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: isTotalCard ? const Color(0xFF00875F) : const Color(0xFF323238),
+        color:
+            customBackgroundColor ??
+            (isTotalCard ? const Color(0xFF00875F) : const Color(0xFF323238)),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
