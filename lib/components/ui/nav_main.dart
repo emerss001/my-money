@@ -64,8 +64,11 @@ class _NavBarMainState extends State<NavBarMain> {
               ),
               const SizedBox(height: 12),
               InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/profile');
+                onTap: () async {
+                  final result = await Navigator.pushNamed(context, '/profile');
+                  if (result == true) {
+                    _loadProfileImage();
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),

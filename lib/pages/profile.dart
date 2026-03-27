@@ -15,6 +15,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final UserRepository _userRepository = UserRepository();
   bool _isLoading = true;
   String? _errorMessage;
+  bool _imageUpdated = false;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -96,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFFE1E1E6)),
           onPressed: () {
-            Navigator.pushNamed(context, '/');
+            Navigator.pop(context, _imageUpdated);
           },
         ),
       ),
@@ -140,7 +141,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     // foto do avatar de perfil
                     AvatarProfile(
                       avatarUrl: _avatarUrl,
-                      onImageUpdated: _loadUserData,
+                      onImageUpdated: () {
+                        _imageUpdated = true;
+                        _loadUserData();
+                      },
                     ),
 
                     const SizedBox(height: 48),
