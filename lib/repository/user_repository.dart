@@ -47,10 +47,17 @@ class UserRepository {
   }
 
   // função para buscar a imagem de perfil do usuário
-  Future<String> obterImagemPerfil() async {
+  Future<Map<String, dynamic>> obterDadosMinPerfil() async {
     try {
-      final response = await _dio.get("/users/profile-image");
-      return response.data["imageUrl"] ?? "";
+      final response = await _dio.get("/users/data-min");
+      var data = response.data;
+
+      Map<String, dynamic> perfilMin = {
+        "nome": data["name"],
+        "imagemUrl": data["imageUrl"],
+      };
+
+      return perfilMin;
     } on DioException catch (e) {
       print('Erro ao obter imagem do perfil: ${e.message}');
       throw "Falha ao obter imagem do perfil. Tente novamente mais tarde.";

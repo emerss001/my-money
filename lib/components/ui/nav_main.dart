@@ -12,23 +12,23 @@ class NavBarMain extends StatefulWidget {
 class _NavBarMainState extends State<NavBarMain> {
   final UserRepository _userRepository = UserRepository();
   String _imageUrl = '';
+  String _nomeUsuario = '';
 
   @override
   void initState() {
     super.initState();
-    _loadProfileImage();
+    _loaderdadosMin();
   }
 
-  Future<void> _loadProfileImage() async {
+  Future<void> _loaderdadosMin() async {
     try {
-      final url = await _userRepository.obterImagemPerfil();
-      if (mounted) {
-        setState(() {
-          _imageUrl = url;
-        });
-      }
+      final perfilMin = await _userRepository.obterDadosMinPerfil();
+      setState(() {
+        _imageUrl = perfilMin["imagemUrl"] ?? '';
+        _nomeUsuario = perfilMin["nome"] ?? '-';
+      });
     } catch (e) {
-      print('Erro ao carregar imagem: $e');
+      print('Erro ao carregar dados mínimos do perfil: $e');
     }
   }
 
@@ -67,7 +67,7 @@ class _NavBarMainState extends State<NavBarMain> {
                 onTap: () async {
                   final result = await Navigator.pushNamed(context, '/profile');
                   if (result == true) {
-                    _loadProfileImage();
+                    _loaderdadosMin();
                   }
                 },
                 child: Padding(
@@ -90,9 +90,9 @@ class _NavBarMainState extends State<NavBarMain> {
                       ),
                       const SizedBox(width: 8),
                       // TODO: Substituir por nome do usuário real
-                      const Text(
-                        'Olá, Emerson',
-                        style: TextStyle(
+                      Text(
+                        "Olá, $_nomeUsuario",
+                        style: const TextStyle(
                           color: Color(0xFFC4C4CC),
                           fontSize: 14,
                         ),
