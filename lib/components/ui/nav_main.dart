@@ -89,6 +89,7 @@ class _NavBarMainState extends State<NavBarMain> {
                             : null,
                       ),
                       const SizedBox(width: 8),
+                      // TODO: Substituir por nome do usuário real
                       const Text(
                         'Olá, Emerson',
                         style: TextStyle(

@@ -7,6 +7,46 @@ class AuthController {
   final AuthRepository _authRepository = AuthRepository();
   final TokenService _tokenService = TokenService();
 
+  Future<void> realizarRegistroEmailSenha(
+    BuildContext context,
+    String nameInput,
+    String emailInput,
+    String passwordInput,
+    String confirmPasswordInput,
+  ) async {
+    try {
+      if (passwordInput != confirmPasswordInput) {
+        throw Exception("As senhas não coincidem.");
+      }
+
+      final tokenAPI = await _authRepository.realizarRegistroEmailSenha(
+        nameInput,
+        emailInput,
+        passwordInput,
+      );
+
+      if (tokenAPI != null) {
+        await _tokenService.salvarToken(tokenAPI);
+
+        if (context.mounted) {
+          CustomSnackBar.show(
+            context: context,
+            message: "Registro realizado com sucesso!",
+          );
+          Navigator.pushReplacementNamed(context, "/home");
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        CustomSnackBar.show(
+          context: context,
+          message: e.toString(),
+          isError: true,
+        );
+      }
+    }
+  }
+
   Future<void> fazerLoginEmailSenha(
     BuildContext context,
     String emailInput,

@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
         "/": (context) => const AuthCheck(),
         "/home": (context) => const HomePage(),
         "/login": (context) => LoginPage(),
-        "/register": (context) => const RegisterPage(),
+        "/register": (context) => RegisterPage(),
         "/profile": (context) => const ProfilePage(),
       },
       debugShowCheckedModeBanner: false,

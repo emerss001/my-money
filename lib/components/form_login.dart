@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:my_money/assets/styles/cores_global.dart';
+import 'package:my_money/components/ui/build_text_field.dart';
 
 class LoginForm extends StatefulWidget {
   final Future<void> Function(String email, String password) onLoginPressed;
@@ -10,7 +12,6 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  bool _isPasswordVisible = false;
   bool _isLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
@@ -34,99 +35,47 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
+  Future<void> _handleLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await widget.onLoginPressed(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFF00875F); // Verde do botão
-    const Color labelColor = Colors.white54;
-    const Color hintColor = Colors.white38;
-    const Color iconColor = Colors.white54;
-    const Color borderColor = Colors.white12;
-
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // LABEL EMAIL
-          const Text(
-            'EMAIL',
-            style: TextStyle(
-              color: labelColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
-
-          // CAMPO EMAIL
-          TextField(
+          BuildTextField(
+            label: 'EMAIL',
+            hint: 'Digite seu email',
+            prefixIcon: Icons.mail_outline,
             controller: _emailController,
-            style: const TextStyle(color: Colors.white),
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              hintText: 'Digite seu email',
-              hintStyle: TextStyle(color: hintColor, fontSize: 15),
-              prefixIcon: Icon(Icons.mail_outline, color: iconColor, size: 22),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: borderColor),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: primaryColor),
-              ),
-              contentPadding: EdgeInsets.symmetric(vertical: 16),
-            ),
           ),
-
           const SizedBox(height: 32),
 
-          // LABEL SENHA
-          const Text(
-            'SENHA',
-            style: TextStyle(
-              color: labelColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
-
-          // CAMPO SENHA
-          TextField(
+          BuildTextField(
+            label: 'SENHA',
+            hint: 'Digite sua senha',
+            prefixIcon: Icons.lock_outline,
             controller: _passwordController,
-            obscureText: !_isPasswordVisible,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: 'Sua senha',
-              hintStyle: const TextStyle(color: hintColor, fontSize: 15),
-              prefixIcon: const Icon(
-                Icons.lock_outline,
-                color: iconColor,
-                size: 22,
-                weight: 1,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _isPasswordVisible
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
-                  color: iconColor,
-                  size: 22,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _isPasswordVisible = !_isPasswordVisible;
-                  });
-                },
-              ),
-              enabledBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: borderColor),
-              ),
-              focusedBorder: const UnderlineInputBorder(
-                borderSide: BorderSide(color: primaryColor),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 16),
-            ),
+            isPassword: true,
           ),
 
           const SizedBox(height: 40),
@@ -140,28 +89,13 @@ class _LoginFormState extends State<LoginForm> {
                   (_emailController.text.trim().isNotEmpty &&
                       _passwordController.text.trim().isNotEmpty &&
                       !_isLoading)
-                  ? () async {
-                      setState(() {
-                        _isLoading = true;
-                      });
-
-                      try {
-                        await widget.onLoginPressed(
-                          _emailController.text.trim(),
-                          _passwordController.text.trim(),
-                        );
-                      } finally {
-                        if (mounted) {
-                          setState(() {
-                            _isLoading = false;
-                          });
-                        }
-                      }
-                    }
+                  ? _handleLogin
                   : null,
               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
-                disabledBackgroundColor: primaryColor.withOpacity(0.5),
+                backgroundColor: CoresGlobal().primaryColor,
+                disabledBackgroundColor: CoresGlobal().primaryColor.withOpacity(
+                  0.5,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),

@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:my_money/assets/styles/cores_global.dart';
+import 'package:my_money/components/ui/build_text_field.dart';
 
 class RegisterForm extends StatefulWidget {
-  final VoidCallback onRegisterPressed;
+  final Future<void> Function(
+    String name,
+    String email,
+    String password,
+    String confirmPassword,
+  )
+  onRegisterPressed;
 
   const RegisterForm({super.key, required this.onRegisterPressed});
 
@@ -10,8 +18,7 @@ class RegisterForm extends StatefulWidget {
 }
 
 class _RegisterFormState extends State<RegisterForm> {
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
+  bool _isLoading = false;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -19,11 +26,18 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  final Color primaryColor = const Color(0xFF00875F);
-  final Color labelColor = Colors.white54;
-  final Color hintColor = Colors.white38;
-  final Color iconColor = Colors.white54;
-  final Color borderColor = Colors.white12;
+  @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_updateButtonState);
+    _emailController.addListener(_updateButtonState);
+    _passwordController.addListener(_updateButtonState);
+    _confirmPasswordController.addListener(_updateButtonState);
+  }
+
+  void _updateButtonState() {
+    setState(() {});
+  }
 
   @override
   void dispose() {
@@ -34,61 +48,25 @@ class _RegisterFormState extends State<RegisterForm> {
     super.dispose();
   }
 
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    required IconData prefixIcon,
-    required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
-    bool isPassword = false,
-    bool? isVisible,
-    VoidCallback? onVisibilityToggle,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: labelColor,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-          ),
-        ),
-        TextField(
-          controller: controller,
-          obscureText: isPassword && !(isVisible ?? false),
-          style: const TextStyle(color: Colors.white),
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: hintColor, fontSize: 15),
-            prefixIcon: Icon(prefixIcon, color: iconColor, size: 22),
-            suffixIcon: isPassword
-                ? IconButton(
-                    icon: Icon(
-                      (isVisible ?? false)
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: iconColor,
-                      size: 22,
-                    ),
-                    onPressed: onVisibilityToggle,
-                  )
-                : null,
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: borderColor),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: primaryColor),
-            ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-        ),
-        const SizedBox(height: 24),
-      ],
-    );
+  Future<void> _handleRegister() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await widget.onRegisterPressed(
+        _nameController.text.trim(),
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+        _confirmPasswordController.text.trim(),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -99,7 +77,7 @@ class _RegisterFormState extends State<RegisterForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildTextField(
+          BuildTextField(
             label: 'NOME',
             hint: 'Seu nome completo',
             prefixIcon: Icons.person_outline,
@@ -107,7 +85,7 @@ class _RegisterFormState extends State<RegisterForm> {
             keyboardType: TextInputType.name,
           ),
 
-          _buildTextField(
+          BuildTextField(
             label: 'EMAIL',
             hint: 'mail@exemplo.br',
             prefixIcon: Icons.mail_outline,
@@ -115,32 +93,20 @@ class _RegisterFormState extends State<RegisterForm> {
             keyboardType: TextInputType.emailAddress,
           ),
 
-          _buildTextField(
+          BuildTextField(
             label: 'SENHA',
             hint: 'Sua senha',
             prefixIcon: Icons.lock_outline,
             controller: _passwordController,
             isPassword: true,
-            isVisible: _isPasswordVisible,
-            onVisibilityToggle: () {
-              setState(() {
-                _isPasswordVisible = !_isPasswordVisible;
-              });
-            },
           ),
 
-          _buildTextField(
+          BuildTextField(
             label: 'CONFIRMAR SENHA',
             hint: 'Confirme sua senha',
             prefixIcon: Icons.lock_outline,
             controller: _confirmPasswordController,
             isPassword: true,
-            isVisible: _isConfirmPasswordVisible,
-            onVisibilityToggle: () {
-              setState(() {
-                _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-              });
-            },
           ),
 
           const SizedBox(height: 16),
@@ -149,9 +115,16 @@ class _RegisterFormState extends State<RegisterForm> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
-              onPressed: widget.onRegisterPressed,
+              onPressed:
+                  _nameController.text.trim().isEmpty ||
+                      _emailController.text.trim().isEmpty ||
+                      _passwordController.text.trim().isEmpty ||
+                      _confirmPasswordController.text.trim().isEmpty ||
+                      _isLoading
+                  ? null
+                  : _handleRegister,
               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryColor,
+                backgroundColor: CoresGlobal().primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),

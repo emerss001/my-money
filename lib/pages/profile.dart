@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/components/ui/logout_button.dart';
-import 'package:my_money/components/ui/build-text-field.dart';
+import 'package:my_money/components/ui/custom_text_field.dart';
 import 'package:my_money/components/ui/avatar_profile.dart';
 import 'package:my_money/repository/user_repository.dart';
 
