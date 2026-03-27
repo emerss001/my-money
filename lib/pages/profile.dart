@@ -140,10 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     // foto do avatar de perfil
                     AvatarProfile(
                       avatarUrl: _avatarUrl,
-                      onCameraTap: () {
-                        // Ação para abrir galeria/câmera
-                        print("Trocar foto clicado");
-                      },
+                      onImageUpdated: _loadUserData,
                     ),
 
                     const SizedBox(height: 48),

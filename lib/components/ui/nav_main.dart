@@ -1,8 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_money/repository/user_repository.dart';
 
-class NavBarMain extends StatelessWidget {
+class NavBarMain extends StatefulWidget {
   const NavBarMain({super.key});
+
+  @override
+  State<NavBarMain> createState() => _NavBarMainState();
+}
+
+class _NavBarMainState extends State<NavBarMain> {
+  final UserRepository _userRepository = UserRepository();
+  String _imageUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileImage();
+  }
+
+  Future<void> _loadProfileImage() async {
+    try {
+      final url = await _userRepository.obterImagemPerfil();
+      if (mounted) {
+        setState(() {
+          _imageUrl = url;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar imagem: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,17 +69,24 @@ class NavBarMain extends StatelessWidget {
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: const Row(
+                  child: Row(
                     children: [
                       CircleAvatar(
                         radius: 14,
-                        backgroundImage: NetworkImage(
-                          'https://github.com/emerss001.png',
-                        ), // Avatar de exemplo usando o seu Github
-                        backgroundColor: Color(0xFF323238),
+                        backgroundColor: const Color(0xFF323238),
+                        backgroundImage: _imageUrl.isNotEmpty
+                            ? NetworkImage(_imageUrl)
+                            : null,
+                        child: _imageUrl.isEmpty
+                            ? const Icon(
+                                Icons.person,
+                                size: 18,
+                                color: Colors.white54,
+                              )
+                            : null,
                       ),
-                      SizedBox(width: 8),
-                      Text(
+                      const SizedBox(width: 8),
+                      const Text(
                         'Olá, Emerson',
                         style: TextStyle(
                           color: Color(0xFFC4C4CC),
