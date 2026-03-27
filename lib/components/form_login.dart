@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class LoginForm extends StatefulWidget {
-  final VoidCallback onLoginPressed;
+  final Future<void> Function(String email, String password) onLoginPressed;
 
   const LoginForm({super.key, required this.onLoginPressed});
 
@@ -11,9 +11,21 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_updateButtonState);
+    _passwordController.addListener(_updateButtonState);
+  }
+
+  void _updateButtonState() {
+    setState(() {});
+  }
 
   @override
   void dispose() {
@@ -124,28 +136,64 @@ class _LoginFormState extends State<LoginForm> {
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
-              onPressed: widget.onLoginPressed,
+              onPressed:
+                  (_emailController.text.trim().isNotEmpty &&
+                      _passwordController.text.trim().isNotEmpty &&
+                      !_isLoading)
+                  ? () async {
+                      setState(() {
+                        _isLoading = true;
+                      });
+
+                      try {
+                        await widget.onLoginPressed(
+                          _emailController.text.trim(),
+                          _passwordController.text.trim(),
+                        );
+                      } finally {
+                        if (mounted) {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      }
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryColor,
+                disabledBackgroundColor: primaryColor.withOpacity(0.5),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 24),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Logar',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Logar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ],
                     ),
-                  ),
-                  Icon(Icons.arrow_forward, color: Colors.white, size: 22),
-                ],
-              ),
             ),
           ),
         ],

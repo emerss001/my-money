@@ -12,7 +12,7 @@ class NavBarMain extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Logo e Sair da conta
+          // Logo e Perfil
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -20,14 +20,14 @@ class NavBarMain extends StatelessWidget {
                 children: [
                   SvgPicture.asset(
                     'lib/assets/images/logo.svg',
-                    width: 30,
-                    height: 30,
+                    width: 24,
+                    height: 24,
                   ),
                   const SizedBox(width: 8),
                   const Text(
                     'DT Money',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: Color(0xFFE1E1E6),
                     ),
@@ -37,19 +37,24 @@ class NavBarMain extends StatelessWidget {
               const SizedBox(height: 12),
               InkWell(
                 onTap: () {
-                  // Ação de sair da conta
-                  Navigator.pushReplacementNamed(context, '/login');
+                  Navigator.pushNamed(context, '/profile');
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: const Row(
                     children: [
-                      Icon(Icons.logout, color: Color(0xFF7C7C8A), size: 16),
-                      SizedBox(width: 4),
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundImage: NetworkImage(
+                          'https://github.com/emerss001.png',
+                        ), // Avatar de exemplo usando o seu Github
+                        backgroundColor: Color(0xFF323238),
+                      ),
+                      SizedBox(width: 8),
                       Text(
-                        'Sair da conta',
+                        'Olá, Emerson',
                         style: TextStyle(
-                          color: Color(0xFF7C7C8A),
+                          color: Color(0xFFC4C4CC),
                           fontSize: 14,
                         ),
                       ),

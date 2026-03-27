@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:my_money/components/auth_action_button.dart';
 import 'package:my_money/components/form_login.dart';
 import 'package:my_money/components/ui/nav_auth.dart';
+import 'package:my_money/controller/auth_controller.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+  final AuthController _authController = AuthController();
+
+  LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +22,15 @@ class LoginPage extends StatelessWidget {
         children: [
           const SizedBox(height: 48),
           LoginForm(
-            onLoginPressed: () {
-              // Lógica de autenticação vai aqui
-              print("Botão de login clicado!");
+            onLoginPressed: (email, password) async {
+              final emailInput = email.trim();
+              final senhaInput = password.trim();
+
+              await _authController.fazerLoginEmailSenha(
+                context,
+                emailInput,
+                senhaInput,
+              );
             },
           ),
 

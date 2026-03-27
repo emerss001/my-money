@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:my_money/pages/auth_check.dart';
 import 'package:my_money/pages/home.dart';
 import 'package:my_money/pages/login.dart';
+import 'package:my_money/pages/profile.dart';
 import 'package:my_money/pages/register.dart';
 
 void main() {
@@ -16,9 +18,11 @@ class MyApp extends StatelessWidget {
       // Configuração de rotas do app
       initialRoute: "/",
       routes: {
-        "/": (context) => const HomePage(),
-        "/login": (context) => const LoginPage(),
+        "/": (context) => const AuthCheck(),
+        "/home": (context) => const HomePage(),
+        "/login": (context) => LoginPage(),
         "/register": (context) => const RegisterPage(),
+        "/profile": (context) => const ProfilePage(),
       },
       debugShowCheckedModeBanner: false,
       title: 'My Money',
