@@ -17,4 +17,15 @@ class TransactionsRepository {
       throw "Falha ao obter métricas globais. Tente novamente mais tarde.";
     }
   }
+
+  // função para buscar transações
+  Future<List<dynamic>> obterTransacoes() async {
+    try {
+      final response = await _dio.get("/transactions");
+      return response.data;
+    } on DioException catch (e) {
+      print('Erro ao obter transações: ${e.message}');
+      throw "Falha ao obter transações. Tente novamente mais tarde.";
+    }
+  }
 }

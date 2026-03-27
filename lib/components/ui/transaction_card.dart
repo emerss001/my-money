@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_money/helpers/formatters.dart';
 
 class TransactionCard extends StatelessWidget {
   final String title;
-  final String amount;
+  final double amount;
   final String category;
   final String date;
   final bool isExpense;
@@ -13,7 +14,7 @@ class TransactionCard extends StatelessWidget {
     required this.amount,
     required this.category,
     required this.date,
-    required this.isExpense,
+    this.isExpense = false,
   });
 
   @override
@@ -22,7 +23,7 @@ class TransactionCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF29292E), // Fundo do card
+        color: const Color(0xFF29292E),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
@@ -34,9 +35,9 @@ class TransactionCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            amount,
+            '${isExpense || amount < 0 ? '- ' : ''}${formattedAmount(amount)}',
             style: TextStyle(
-              color: isExpense
+              color: isExpense || amount < 0
                   ? const Color(0xFFF75A68)
                   : const Color(0xFF00B37E),
               fontSize: 20,
@@ -73,7 +74,7 @@ class TransactionCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    date,
+                    formattedDate(date),
                     style: const TextStyle(
                       color: Color(0xFF7C7C8A),
                       fontSize: 14,

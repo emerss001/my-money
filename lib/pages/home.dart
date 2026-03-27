@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
                       const SizedBox(height: 16),
                       const SearchField(),
                       const SizedBox(height: 24),
-                      const TransactionsList(),
+                      TransactionsList(),
                     ],
                   ),
                 ),

@@ -1,49 +1,83 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/components/ui/transaction_card.dart';
+import 'package:my_money/repository/transactions_repository.dart';
 
 class TransactionsList extends StatelessWidget {
-  const TransactionsList({super.key});
+  final TransactionsRepository _transactionsRepository =
+      TransactionsRepository();
+
+  TransactionsList({super.key});
+
+  Future<Map<String, dynamic>> _fetchData() async {
+    // Simulação de uma chamada de API para obter as transações
+    final data = await _transactionsRepository.obterTransacoes();
+    return {"transactions": data};
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        TransactionCard(
-          title: 'Hamburguer',
-          amount: '- R\$ 59,00',
-          category: 'Alimentação',
-          date: '10/04/2022',
-          isExpense: true,
-        ),
-        TransactionCard(
-          title: 'Aluguel do apartamento',
-          amount: '- R\$ 1.200,00',
-          category: 'Casa',
-          date: '27/03/2022',
-          isExpense: true,
-        ),
-        TransactionCard(
-          title: 'Computador',
-          amount: 'R\$ 5.400,00',
-          category: 'Venda',
-          date: '15/03/2022',
-          isExpense: false,
-        ),
-        TransactionCard(
-          title: 'Desenvolvimento de site',
-          amount: 'R\$ 8.000,00',
-          category: 'Venda',
-          date: '13/03/2022',
-          isExpense: false,
-        ),
-        TransactionCard(
-          title: 'Janta',
-          amount: '- R\$ 39,00',
-          category: 'Alimentação',
-          date: '10/03/2022',
-          isExpense: true,
-        ),
-      ],
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _fetchData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.all(32.0),
+            child: Center(
+              child: CircularProgressIndicator(color: Color(0xFF00B37E)),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              'Erro ao carregar transações',
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }
+
+        final transactions =
+            snapshot.data?['transactions'] as List<dynamic>? ?? [];
+
+        if (transactions.isEmpty) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 64.0),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.description_outlined,
+                    size: 48,
+                    color: Color(0xFF7C7C8A),
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Nenhuma transação cadastrada.',
+                    style: TextStyle(color: Color(0xFF7C7C8A), fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          children: transactions.map((transaction) {
+            final double amount =
+                (transaction['amount'] as num?)?.toDouble() ?? 0.0;
+
+            return TransactionCard(
+              title: transaction['title'],
+              amount: amount,
+              category: transaction['category'],
+              date: transaction['createdAt'],
+              isExpense: transaction['type'] == "saida",
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

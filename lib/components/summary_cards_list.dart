@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/components/ui/summary_card.dart';
+import 'package:my_money/helpers/formatters.dart';
 import 'package:my_money/repository/transactions_repository.dart';
 
 class SummaryCardsList extends StatefulWidget {
@@ -29,53 +30,6 @@ class _SummaryCardsListState extends State<SummaryCardsList> {
     _loadMetrics();
   }
 
-  String _formatCurrency(num value) {
-    bool isNegative = value < 0;
-    String strVal = value.abs().toStringAsFixed(2);
-    List<String> parts = strVal.split('.');
-    String natural = parts[0];
-    String decimal = parts[1];
-
-    String result = "";
-    int count = 0;
-    for (int i = natural.length - 1; i >= 0; i--) {
-      if (count > 0 && count % 3 == 0) {
-        result = ".$result";
-      }
-      result = natural[i] + result;
-      count++;
-    }
-    return "${isNegative ? '-' : ''}R\$ $result,$decimal";
-  }
-
-  String _formatDate(String? isoDate) {
-    if (isoDate == null) return '';
-    final date = DateTime.parse(isoDate).toLocal();
-    const months = [
-      'janeiro',
-      'fevereiro',
-      'março',
-      'abril',
-      'maio',
-      'junho',
-      'julho',
-      'agosto',
-      'setembro',
-      'outubro',
-      'novembro',
-      'dezembro',
-    ];
-    return "${date.day} de ${months[date.month - 1]}";
-  }
-
-  String _formatTotalDate(String? first, String? last) {
-    if (first == null || last == null) return 'Não há movimentações';
-    final d1 = DateTime.parse(first).toLocal();
-    final d2 = DateTime.parse(last).toLocal();
-    String pad(int n) => n.toString().padLeft(2, '0');
-    return 'De ${pad(d1.day)}/${pad(d1.month)}/${d1.year.toString().substring(2)} até ${pad(d2.day)}/${pad(d2.month)}/${d2.year.toString().substring(2)}';
-  }
-
   Future<void> _loadMetrics() async {
     try {
       final data = await _repository.obterMetricasGlobais();
@@ -83,23 +37,24 @@ class _SummaryCardsListState extends State<SummaryCardsList> {
         setState(() {
           double eTotal = (data['entradas']?['total'] ?? 0).toDouble();
           String? eLast = data['entradas']?['lastDate'];
-          entradasTotal = _formatCurrency(eTotal);
+          entradasTotal = '${eTotal < 0 ? '- ' : ''}${formattedAmount(eTotal)}';
           entradasSub = eLast != null
-              ? 'Última entrada em ${_formatDate(eLast)}'
+              ? 'Última entrada em ${formattedDateComplete(eLast)}'
               : 'Não há movimentações';
 
           double sTotal = (data['saidas']?['total'] ?? 0).toDouble();
           String? sLast = data['saidas']?['lastDate'];
-          saidasTotal = _formatCurrency(sTotal);
+          saidasTotal = '${sTotal < 0 ? '- ' : ''}${formattedAmount(sTotal)}';
           saidasSub = sLast != null
-              ? 'Última saída em ${_formatDate(sLast)}'
+              ? 'Última saída em ${formattedDateComplete(sLast)}'
               : 'Não há movimentações';
 
           totalBalance = (data['total']?['balance'] ?? 0).toDouble();
-          totalBalanceText = _formatCurrency(totalBalance);
+          totalBalanceText =
+              '${totalBalance < 0 ? '- ' : ''}${formattedAmount(totalBalance)}';
           String? tFirst = data['total']?['firstDate'];
           String? tLast = data['total']?['lastDate'];
-          totalSub = _formatTotalDate(tFirst, tLast);
+          totalSub = formattedTotalDate(tFirst, tLast);
 
           _isLoading = false;
         });
