@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_money/repository/user_repository.dart';
+import 'package:my_money/components/new_transaction_form.dart';
 
 class NavBarMain extends StatefulWidget {
   const NavBarMain({super.key});
@@ -30,6 +31,37 @@ class _NavBarMainState extends State<NavBarMain> {
     } catch (e) {
       print('Erro ao carregar dados mínimos do perfil: $e');
     }
+  }
+
+  // NOVA FUNÇÃO: Abre o modal de nova transação
+  void _abrirModalNovaTransacao() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled:
+          true, // Permite que o modal ocupe o tamanho necessário
+      backgroundColor: Colors
+          .transparent, // Deixa o fundo transparente para ver as bordas arredondadas do componente
+      builder: (context) {
+        return Padding(
+          // Empurra o modal para cima quando o teclado do celular abrir
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: NewTransactionForm(
+            onClosePressed: () {
+              Navigator.of(context).pop(); // Fecha o modal no botão "X"
+            },
+            onRegisterPressed: (descricao, preco, categoria, tipo) {
+              // Aqui vai a lógica para salvar no banco/API
+              print('Salvando: $descricao | $preco | $categoria | $tipo');
+
+              // Fecha o modal após salvar
+              Navigator.of(context).pop();
+            },
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -89,7 +121,6 @@ class _NavBarMainState extends State<NavBarMain> {
                             : null,
                       ),
                       const SizedBox(width: 8),
-                      // TODO: Substituir por nome do usuário real
                       Text(
                         "Olá, $_nomeUsuario",
                         style: const TextStyle(
@@ -104,9 +135,9 @@ class _NavBarMainState extends State<NavBarMain> {
             ],
           ),
 
-          // Botão Nova Transação
+          // Botão Nova Transação (ATUALIZADO)
           ElevatedButton(
-            onPressed: () {},
+            onPressed: _abrirModalNovaTransacao, // Chama a função criada acima
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00875F),
               foregroundColor: Colors.white,

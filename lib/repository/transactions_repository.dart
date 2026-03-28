@@ -18,6 +18,19 @@ class TransactionsRepository {
     }
   }
 
+  // função para buscar categorias
+  Future<List<dynamic>> obterCategorias() async {
+    try {
+      final response = await _dio.get("/transactions/categories");
+
+      var categorias = response.data;
+      return categorias;
+    } on DioException catch (e) {
+      print('Erro ao obter categorias: ${e.message}');
+      throw "Falha ao obter categorias. Tente novamente mais tarde.";
+    }
+  }
+
   // função para buscar transações
   Future<List<dynamic>> obterTransacoes() async {
     try {
