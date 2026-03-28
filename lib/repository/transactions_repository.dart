@@ -41,4 +41,27 @@ class TransactionsRepository {
       throw "Falha ao obter transações. Tente novamente mais tarde.";
     }
   }
+
+  // função para criar nova transação
+  Future<void> criarTransacao({
+    required String title,
+    required double amount,
+    required String type,
+    required String categoryId,
+  }) async {
+    try {
+      await _dio.post(
+        "/transactions",
+        data: {
+          "title": title,
+          "amount": amount,
+          "type": type,
+          "categoryId": categoryId,
+        },
+      );
+    } on DioException catch (e) {
+      print('Erro ao criar transação: ${e.message}');
+      throw "Falha ao criar transação. Tente novamente mais tarde.";
+    }
+  }
 }

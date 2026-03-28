@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:my_money/controller/transactions_controller.dart';
 import 'package:my_money/repository/user_repository.dart';
 import 'package:my_money/components/new_transaction_form.dart';
 
@@ -12,6 +13,9 @@ class NavBarMain extends StatefulWidget {
 
 class _NavBarMainState extends State<NavBarMain> {
   final UserRepository _userRepository = UserRepository();
+  final TransactionsController _transactionsController =
+      TransactionsController();
+
   String _imageUrl = '';
   String _nomeUsuario = '';
 
@@ -51,9 +55,13 @@ class _NavBarMainState extends State<NavBarMain> {
             onClosePressed: () {
               Navigator.of(context).pop(); // Fecha o modal no botão "X"
             },
-            onRegisterPressed: (descricao, preco, categoria, tipo) {
-              // Aqui vai a lógica para salvar no banco/API
-              print('Salvando: $descricao | $preco | $categoria | $tipo');
+            onRegisterPressed: (descricao, preco, categoria, tipo) async {
+              await _transactionsController.criarTransacao(
+                title: descricao,
+                amount: preco,
+                type: tipo,
+                categoryId: categoria,
+              );
 
               // Fecha o modal após salvar
               Navigator.of(context).pop();

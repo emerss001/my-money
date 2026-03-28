@@ -31,8 +31,6 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: const Color(0xFF202024),
           onRefresh: _handleRefresh,
           child: SingleChildScrollView(
-            // physics: AlwaysScrollableScrollPhysics é essencial para o Push To Refresh funcionar
-            // mesmo quando os itens da tela não preencherem tudo
             physics: const AlwaysScrollableScrollPhysics(),
             child: Column(
               key: _refreshKey,
