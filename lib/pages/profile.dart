@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_money/assets/styles/cores_global.dart';
 import 'package:my_money/components/ui/logout_button.dart';
 import 'package:my_money/components/ui/custom_text_field.dart';
 import 'package:my_money/components/ui/avatar_profile.dart';
-import 'package:my_money/repository/user_repository.dart';
+import 'package:my_money/features/user/user_controller.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -12,7 +13,8 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final UserRepository _userRepository = UserRepository();
+  final UserController _userController = UserController();
+
   bool _isLoading = true;
   String? _errorMessage;
   bool _imageUpdated = false;
@@ -24,15 +26,6 @@ class _ProfilePageState extends State<ProfilePage> {
   );
 
   String _avatarUrl = '';
-
-  // Cores do padrão do app
-  final Color primaryColor = const Color(0xFF00875F);
-  final Color dangerColor = const Color(
-    0xFFF75A68,
-  ); // Vermelho usado nas "saídas"
-  final Color labelColor = Colors.white54;
-  final Color iconColor = Colors.white54;
-  final Color borderColor = Colors.white12;
 
   @override
   void initState() {
@@ -47,27 +40,20 @@ class _ProfilePageState extends State<ProfilePage> {
     });
 
     try {
-      final data = await _userRepository.obterPerfilUsuario();
-      if (mounted) {
-        setState(() {
-          _nameController.text = data["nome"] ?? "";
-          _emailController.text = data["email"] ?? "";
-          _dateController.text = data["criadoEm"] != null
-              ? DateTime.parse(
-                  data["criadoEm"],
-                ).toLocal().toString().split(' ')[0]
-              : "-";
-          _avatarUrl = data["imagemUrl"] ?? "";
-          _isLoading = false;
-        });
-      }
+      final user = await _userController.obterPerfilUsuario();
+
+      _nameController.text = user.name;
+      _emailController.text = user.email;
+      _dateController.text = user.createdAt;
+      _avatarUrl = user.imageUrl;
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString();
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _errorMessage = e.toString().replaceAll('Exception: ', '');
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -102,7 +88,11 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: primaryColor))
+          ? Center(
+              child: CircularProgressIndicator(
+                color: CoresGlobal().primaryColor,
+              ),
+            )
           : _errorMessage != null
           ? Center(
               child: Padding(
@@ -110,7 +100,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, color: dangerColor, size: 48),
+                    Icon(
+                      Icons.error_outline,
+                      color: CoresGlobal().outcomeColor,
+                      size: 48,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       _errorMessage!,
@@ -121,7 +115,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ElevatedButton(
                       onPressed: _loadUserData,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryColor,
+                        backgroundColor: CoresGlobal().primaryColor,
                       ),
                       child: const Text(
                         'Tentar novamente',
@@ -160,6 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       label: 'EMAIL',
                       prefixIcon: Icons.mail_outline,
                       controller: _emailController,
+                      readOnly: true,
                     ),
 
                     CustomTextField(
@@ -172,7 +167,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 32),
 
                     // botões de ação
-                    LogoutButton(borderColor: borderColor),
+                    LogoutButton(borderColor: CoresGlobal().borderColor),
 
                     const SizedBox(height: 16),
 
@@ -184,11 +179,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         onPressed: () {
                           print("Excluir conta");
                         },
-                        icon: Icon(Icons.delete_outline, color: dangerColor),
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: CoresGlobal().outcomeColor,
+                        ),
                         label: Text(
                           'Excluir conta',
                           style: TextStyle(
-                            color: dangerColor,
+                            color: CoresGlobal().outcomeColor,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),

@@ -1,13 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/components/auth_action_button.dart';
 import 'package:my_money/components/form_login.dart';
+import 'package:my_money/components/ui/custom_snackbar.dart';
 import 'package:my_money/components/ui/nav_auth.dart';
-import 'package:my_money/controller/auth_controller.dart';
+import 'package:my_money/features/auth/auth_controller.dart';
 
 class LoginPage extends StatelessWidget {
   final AuthController _authController = AuthController();
 
   LoginPage({super.key});
+
+  Future<void> _handleLogin(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
+    final success = await _authController.realizarLoginEmailSenha(
+      email,
+      password,
+    );
+
+    if (!context.mounted) return;
+
+    if (success) {
+      CustomSnackBar.show(
+        context: context,
+        message: "Login realizado com sucesso!",
+      );
+      Navigator.pushReplacementNamed(context, "/home");
+    } else {
+      CustomSnackBar.show(
+        context: context,
+        message: _authController.errorMessage.value ?? "Erro ao fazer login.",
+        isError: true,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,21 +44,14 @@ class LoginPage extends StatelessWidget {
       backgroundColor: Color(0xFF1E1E1E),
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
-        child: NavBarAuth(),
+        child: const NavBarAuth(),
       ),
       body: Column(
         children: [
           const SizedBox(height: 48),
           LoginForm(
             onLoginPressed: (email, password) async {
-              final emailInput = email.trim();
-              final senhaInput = password.trim();
-
-              await _authController.fazerLoginEmailSenha(
-                context,
-                emailInput,
-                senhaInput,
-              );
+              await _handleLogin(context, email, password);
             },
           ),
 

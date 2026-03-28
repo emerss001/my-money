@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_money/auth/token_service.dart';
+import 'package:my_money/core/token_service.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class AuthCheck extends StatefulWidget {

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:my_money/auth/token_service.dart';
+import 'package:my_money/core/token_service.dart';
 
 class ApiClient {
   late Dio dio;

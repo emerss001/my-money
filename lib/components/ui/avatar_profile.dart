@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:my_money/repository/user_repository.dart';
+import 'package:my_money/assets/styles/cores_global.dart';
+import 'package:my_money/components/ui/custom_snackbar.dart';
 import 'dart:io';
+import 'package:my_money/features/user/user_controller.dart';
 
 class AvatarProfile extends StatefulWidget {
   final String avatarUrl;
@@ -18,9 +20,10 @@ class AvatarProfile extends StatefulWidget {
 }
 
 class _AvatarProfileState extends State<AvatarProfile> {
+  final UserController _userController = UserController();
   bool _isLoading = false;
 
-  Future<void> onCameraTap() async {
+  Future<void> onCameraTap(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
@@ -30,15 +33,30 @@ class _AvatarProfileState extends State<AvatarProfile> {
       });
 
       try {
-        final UserRepository userRepository = UserRepository();
-        await userRepository.atualizarImagemPerfil(File(image.path));
+        final success = await _userController.atualizarImagemPerfil(
+          File(image.path),
+        );
 
         if (widget.onImageUpdated != null) {
           widget.onImageUpdated!();
         }
-        print("Imagem atualizada com sucesso");
+
+        if (!context.mounted) return;
+
+        if (success) {
+          CustomSnackBar.show(
+            context: context,
+            message: "Imagem de perfil atualizada com sucesso!",
+          );
+        } else {
+          CustomSnackBar.show(
+            context: context,
+            message: "Falha ao atualizar imagem!",
+            isError: true,
+          );
+        }
       } catch (e) {
-        print(e);
+        print("Erro ao atualizar imagem: $e");
       } finally {
         setState(() {
           _isLoading = false;
@@ -49,8 +67,6 @@ class _AvatarProfileState extends State<AvatarProfile> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFF00875F);
-
     return Center(
       child: Stack(
         children: [
@@ -59,15 +75,15 @@ class _AvatarProfileState extends State<AvatarProfile> {
             height: 120,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: const Color(0xFF202024),
+              color: CoresGlobal().backgroundColor,
               border: Border.all(
-                color: primaryColor,
+                color: CoresGlobal().primaryColor,
                 width: _isLoading ? 0 : 2,
               ),
             ),
             child: Center(
               child: _isLoading
-                  ? const CircularProgressIndicator(color: primaryColor)
+                  ? CircularProgressIndicator(color: CoresGlobal().primaryColor)
                   : CircleAvatar(
                       radius: 58,
                       backgroundColor: const Color(0xFF323238),
@@ -89,15 +105,15 @@ class _AvatarProfileState extends State<AvatarProfile> {
               bottom: 0,
               right: 0,
               child: GestureDetector(
-                onTap: onCameraTap,
+                onTap: () => onCameraTap(context),
                 child: Container(
                   height: 40,
                   width: 40,
                   decoration: BoxDecoration(
-                    color: primaryColor,
+                    color: CoresGlobal().primaryColor,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: const Color(0xFF121214),
+                      color: CoresGlobal().backgroundColor,
                       width: 3,
                     ),
                   ),

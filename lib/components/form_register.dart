@@ -116,34 +116,50 @@ class _RegisterFormState extends State<RegisterForm> {
             height: 56,
             child: ElevatedButton(
               onPressed:
-                  _nameController.text.trim().isEmpty ||
+                  (_nameController.text.trim().isEmpty ||
                       _emailController.text.trim().isEmpty ||
                       _passwordController.text.trim().isEmpty ||
                       _confirmPasswordController.text.trim().isEmpty ||
-                      _isLoading
+                      _isLoading)
                   ? null
                   : _handleRegister,
               style: ElevatedButton.styleFrom(
                 backgroundColor: CoresGlobal().primaryColor,
+                disabledBackgroundColor: CoresGlobal().primaryColor.withOpacity(
+                  0.5,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 24),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Cadastrar',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Registrar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ],
                     ),
-                  ),
-                  Icon(Icons.arrow_forward, color: Colors.white, size: 22),
-                ],
-              ),
             ),
           ),
         ],

@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:my_money/http/api_client.dart';
+import 'package:my_money/core/api_client.dart';
 
 class TransactionsRepository {
   final Dio _dio = ApiClient().dio;

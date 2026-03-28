@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_money/auth/token_service.dart';
+import 'package:my_money/core/token_service.dart';
 import 'package:my_money/components/ui/custom_snackbar.dart';
 
 class LogoutButton extends StatelessWidget {

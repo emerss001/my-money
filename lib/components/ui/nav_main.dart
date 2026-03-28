@@ -1,44 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:my_money/controller/transactions_controller.dart';
-import 'package:my_money/repository/user_repository.dart';
 import 'package:my_money/components/new_transaction_form.dart';
 
-class NavBarMain extends StatefulWidget {
-  const NavBarMain({super.key});
+class NavBarMain extends StatelessWidget {
+  final String imageUrl;
+  final String nomeUsuario;
+  final VoidCallback onProfileUpdated;
 
-  @override
-  State<NavBarMain> createState() => _NavBarMainState();
-}
+  NavBarMain({
+    super.key,
+    required this.imageUrl,
+    required this.nomeUsuario,
+    required this.onProfileUpdated,
+  });
 
-class _NavBarMainState extends State<NavBarMain> {
-  final UserRepository _userRepository = UserRepository();
   final TransactionsController _transactionsController =
       TransactionsController();
 
-  String _imageUrl = '';
-  String _nomeUsuario = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _loaderdadosMin();
-  }
-
-  Future<void> _loaderdadosMin() async {
-    try {
-      final perfilMin = await _userRepository.obterDadosMinPerfil();
-      setState(() {
-        _imageUrl = perfilMin["imagemUrl"] ?? '';
-        _nomeUsuario = perfilMin["nome"] ?? '-';
-      });
-    } catch (e) {
-      print('Erro ao carregar dados mínimos do perfil: $e');
-    }
-  }
-
   // NOVA FUNÇÃO: Abre o modal de nova transação
-  void _abrirModalNovaTransacao() {
+  void _abrirModalNovaTransacao(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled:
@@ -107,7 +88,7 @@ class _NavBarMainState extends State<NavBarMain> {
                 onTap: () async {
                   final result = await Navigator.pushNamed(context, '/profile');
                   if (result == true) {
-                    _loaderdadosMin();
+                    onProfileUpdated();
                   }
                 },
                 child: Padding(
@@ -117,10 +98,10 @@ class _NavBarMainState extends State<NavBarMain> {
                       CircleAvatar(
                         radius: 14,
                         backgroundColor: const Color(0xFF323238),
-                        backgroundImage: _imageUrl.isNotEmpty
-                            ? NetworkImage(_imageUrl)
+                        backgroundImage: imageUrl.isNotEmpty
+                            ? NetworkImage(imageUrl)
                             : null,
-                        child: _imageUrl.isEmpty
+                        child: imageUrl.isEmpty
                             ? const Icon(
                                 Icons.person,
                                 size: 18,
@@ -130,7 +111,7 @@ class _NavBarMainState extends State<NavBarMain> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        "Olá, $_nomeUsuario",
+                        "Olá, $nomeUsuario",
                         style: const TextStyle(
                           color: Color(0xFFC4C4CC),
                           fontSize: 14,
@@ -145,7 +126,9 @@ class _NavBarMainState extends State<NavBarMain> {
 
           // Botão Nova Transação (ATUALIZADO)
           ElevatedButton(
-            onPressed: _abrirModalNovaTransacao, // Chama a função criada acima
+            onPressed: () => _abrirModalNovaTransacao(
+              context,
+            ), // Chama a função criada acima
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00875F),
               foregroundColor: Colors.white,
