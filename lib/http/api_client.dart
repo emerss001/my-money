@@ -6,7 +6,7 @@ class ApiClient {
 
   ApiClient() {
     BaseOptions options = BaseOptions(
-      baseUrl: "http://192.168.0.109:3434",
+      baseUrl: "https://api-my-money-qt5b.onrender.com",
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {"Content-Type": "application/json"},

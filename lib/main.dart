@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// ignore: depend_on_referenced_packages
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:my_money/pages/auth_check.dart';
 import 'package:my_money/pages/home.dart';
 import 'package:my_money/pages/login.dart';
@@ -6,6 +8,9 @@ import 'package:my_money/pages/profile.dart';
 import 'package:my_money/pages/register.dart';
 
 void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
   runApp(const MyApp());
 }
 

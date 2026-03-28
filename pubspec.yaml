@@ -51,6 +51,8 @@ dev_dependencies:
     # package. See that file for information about deactivating specific lint
     # rules and activating additional ones.
     flutter_lints: ^6.0.0
+    flutter_launcher_icons: ^0.14.4
+    flutter_native_splash: ^2.4.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -65,7 +67,7 @@ flutter:
     # To add assets to your application, add an assets section, like this:
     assets:
         - lib/assets/images/logo.svg
-    #   - images/a_dot_ham.jpeg
+        - lib/assets/images/icone.png
 
     # An image asset can refer to one or more resolution-specific "variants", see
     # https://flutter.dev/to/resolution-aware-images
@@ -92,3 +94,20 @@ flutter:
     #
     # For details regarding fonts from package dependencies,
     # see https://flutter.dev/to/font-from-package
+
+flutter_launcher_icons:
+    android: "launcher_icon"
+    ios: true
+    image_path: "lib/assets/images/icone.png"
+
+# Coloque isso no final do seu pubspec.yaml
+flutter_native_splash:
+    # A cor de fundo da tela (ex: branco puro)
+    color: "#202024"
+
+    # O caminho para a sua logo (pode usar a mesma do ícone)
+    image: "lib/assets/images/icone.png"
+
+    # Ativa a criação para ambas as plataformas
+    android: true
+    ios: true
