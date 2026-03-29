@@ -1,12 +1,10 @@
-enum TransactionType { entrada, saida }
-
 class TransactionModel {
   final int id;
   final String title;
   final double amount;
   final String createdAt;
-  final TransactionType type;
-  final String category;
+  final String type;
+  final CategoryModel category;
 
   TransactionModel({
     required this.id,
@@ -23,10 +21,8 @@ class TransactionModel {
       title: json['title'] as String,
       amount: (json['amount'] as num).toDouble(),
       createdAt: json['createdAt'] as String,
-      type: json['type'] == 'entrada'
-          ? TransactionType.entrada
-          : TransactionType.saida,
-      category: json['category'] as String,
+      type: json['type'] as String,
+      category: CategoryModel.fromJson(json['category']),
     );
   }
 }

@@ -95,4 +95,58 @@ class TransactionsController {
       isLoading.value = false;
     }
   }
+
+  // excluir transação
+  Future<bool> excluirTransacao(int id) async {
+    isLoading.value = true;
+    errorMessage.value = null;
+
+    try {
+      final sucesso = await _repository.excluirTransacao(id);
+      return sucesso;
+    } catch (e) {
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // função de edição de transação
+  Future<bool> editarTransacao({
+    required int id,
+    required String title,
+    required double amount,
+    required String type,
+    required int categoryId,
+  }) async {
+    isLoading.value = true;
+    errorMessage.value = null;
+
+    try {
+      if (title.isEmpty ||
+          amount <= 0 ||
+          (type != 'entrada' && type != 'saida')) {
+        errorMessage.value =
+            "Dados inválidos. Verifique as informações e tente novamente.";
+        throw Exception(
+          "Dados inválidos. Verifique as informações e tente novamente.",
+        );
+      }
+
+      final sucesso = await _repository.editarTransacao(
+        id: id,
+        title: title,
+        amount: amount,
+        type: type,
+        categoryId: categoryId,
+      );
+      return sucesso;
+    } catch (e) {
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

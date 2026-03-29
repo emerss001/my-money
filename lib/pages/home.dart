@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/assets/styles/cores_global.dart';
+import 'package:my_money/components/new_transaction_form.dart';
 import 'package:my_money/components/transactions_list.dart';
+import 'package:my_money/components/ui/custom_snackbar.dart';
 import 'package:my_money/components/ui/nav_main.dart';
 import 'package:my_money/components/summary_cards_list.dart';
 import 'package:my_money/features/transactions/transactions_controller.dart';
@@ -75,6 +77,111 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _handleDeleteTransaction(int transactionId) async {
+    await _transactionsController.excluirTransacao(transactionId);
+
+    if (!context.mounted) return;
+
+    if (mounted) {
+      CustomSnackBar.show(
+        context: context,
+        message: "Transação excluída com sucesso!",
+      );
+
+      await _carregarHomePageDados(); // Recarrega os dados da Home
+    } else {
+      CustomSnackBar.show(
+        context: context,
+        message:
+            _transactionsController.errorMessage.value ??
+            "Erro ao excluir transação.",
+        isError: true,
+      );
+    }
+  }
+
+  Future<void> _handleEditTransaction({
+    required int idTransacao,
+    required String tittleInicial,
+    required double precoInicial,
+    required int categoriaIdInicial,
+    required String tipoInicial,
+  }) async {
+    // Lógica para editar a transação
+    await _transactionsController.editarTransacao(
+      id: idTransacao,
+      title: tittleInicial,
+      amount: precoInicial,
+      type: tipoInicial,
+      categoryId: categoriaIdInicial,
+    );
+
+    if (!context.mounted) return;
+    if (mounted) {
+      CustomSnackBar.show(
+        context: context,
+        message: "Transação editada com sucesso!",
+      );
+
+      await _carregarHomePageDados(); // Recarrega os dados da Home
+    } else {
+      CustomSnackBar.show(
+        context: context,
+        message:
+            _transactionsController.errorMessage.value ??
+            "Erro ao editar transação.",
+        isError: true,
+      );
+    } // Recarrega os dados da HomePage após editar a transação
+  }
+
+  void _abrirModalTransacao({
+    int? idTransacao,
+    String? tittleInicial,
+    double? precoInicial,
+    int? categoriaIdInicial,
+    String? tipoInicial,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: NewTransactionForm(
+            transactionId: idTransacao,
+            initialTitle: tittleInicial,
+            initialPrice: precoInicial,
+            initialCategoryId: categoriaIdInicial,
+            initialType: tipoInicial,
+            isEditMode: idTransacao != null,
+            onClosePressed: () => Navigator.of(context).pop(),
+            onRegisterPressed: (descricao, preco, categoria, tipo) async {
+              if (idTransacao != null) {
+                // Lógica para editar a transação
+                await _handleEditTransaction(
+                  idTransacao: idTransacao,
+                  tittleInicial: descricao,
+                  precoInicial: preco,
+                  categoriaIdInicial: categoria,
+                  tipoInicial: tipo,
+                );
+              } else {
+                // Lógica para criar uma nova transação
+                await _salvarNovaTransacao(descricao, preco, categoria, tipo);
+              }
+
+              Navigator.of(context).pop();
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,7 +199,7 @@ class _HomePageState extends State<HomePage> {
                       NavBarMain(
                         imageUrl: _imageUrl,
                         nomeUsuario: _nomeUsuario,
-                        onNovaTransacaoSalva: _salvarNovaTransacao,
+                        onNovaTransacaoPressed: () => _abrirModalTransacao(),
                       ),
 
                       SummaryCardsList(
@@ -122,6 +229,23 @@ class _HomePageState extends State<HomePage> {
                                   _transactionsController.transacoes.value,
                               isLoading:
                                   _transactionsController.isLoading.value,
+                              onEdit:
+                                  ({
+                                    int? idTransacao,
+                                    String? tittleInicial,
+                                    double? precoInicial,
+                                    int? categoriaIdInicial,
+                                    String? tipoInicial,
+                                  }) {
+                                    _abrirModalTransacao(
+                                      idTransacao: idTransacao,
+                                      tittleInicial: tittleInicial,
+                                      precoInicial: precoInicial,
+                                      categoriaIdInicial: categoriaIdInicial,
+                                      tipoInicial: tipoInicial,
+                                    );
+                                  },
+                              onDelete: _handleDeleteTransaction,
                             ),
                           ],
                         ),

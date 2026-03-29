@@ -1,46 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:my_money/components/new_transaction_form.dart';
 
 class NavBarMain extends StatelessWidget {
   final String imageUrl;
   final String nomeUsuario;
   // final VoidCallback onProfileUpdated;
-  final Function(String title, double amount, int categoryId, String type)
-  onNovaTransacaoSalva;
+  final Function() onNovaTransacaoPressed;
 
   NavBarMain({
     super.key,
     required this.imageUrl,
     required this.nomeUsuario,
     // required this.onProfileUpdated,
-    required this.onNovaTransacaoSalva,
+    required this.onNovaTransacaoPressed,
   });
-
-  void _abrirModalNovaTransacao(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: NewTransactionForm(
-            onClosePressed: () {
-              Navigator.of(context).pop();
-            },
-            onRegisterPressed: (descricao, preco, categoria, tipo) async {
-              await onNovaTransacaoSalva(descricao, preco, categoria, tipo);
-
-              if (context.mounted) Navigator.of(context).pop();
-            },
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,9 +88,7 @@ class NavBarMain extends StatelessWidget {
 
           // Botão Nova Transação (ATUALIZADO)
           ElevatedButton(
-            onPressed: () => _abrirModalNovaTransacao(
-              context,
-            ), // Chama a função criada acima
+            onPressed: onNovaTransacaoPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF00875F),
               foregroundColor: Colors.white,

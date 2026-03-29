@@ -84,4 +84,55 @@ class TransactionsRepository {
       throw Exception("Falha ao criar transação. Tente novamente mais tarde.");
     }
   }
+
+  // função para excluir uma transação
+  Future<bool> excluirTransacao(int id) async {
+    try {
+      await _dio.delete("/transactions/$id", data: {});
+      return true;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.statusCode == 404) {
+        print('Transação não encontrada para exclusão: ${e.message}');
+        throw Exception(
+          "Transação não encontrada. Ela pode já ter sido excluída.",
+        );
+      }
+
+      print('Erro ao excluir transação: ${e.message}');
+      throw Exception(
+        "Falha ao excluir transação. Tente novamente mais tarde.",
+      );
+    }
+  }
+
+  // função para editar uma transação
+  Future<bool> editarTransacao({
+    required int id,
+    required String title,
+    required double amount,
+    required String type,
+    required int categoryId,
+  }) async {
+    try {
+      await _dio.put(
+        "/transactions/$id",
+        data: {
+          "title": title,
+          "amount": amount,
+          "type": type,
+          "categoryId": categoryId,
+        },
+      );
+      return true;
+    } on DioException catch (e) {
+      if (e.response != null && e.response?.statusCode == 404) {
+        print('Transação não encontrada para edição: ${e.message}');
+        throw Exception(
+          "Transação não encontrada. Ela pode já ter sido excluída.",
+        );
+      }
+      print('Erro ao editar transação: ${e.message}');
+      throw Exception("Falha ao editar transação. Tente novamente mais tarde.");
+    }
+  }
 }

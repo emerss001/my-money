@@ -6,11 +6,22 @@ class TransactionsList extends StatelessWidget {
   // Recebe a lista via "Props"
   final List<TransactionModel> transactions;
   final bool isLoading;
+  final Function({
+    int? idTransacao,
+    String? tittleInicial,
+    double? precoInicial,
+    int? categoriaIdInicial,
+    String? tipoInicial,
+  })?
+  onEdit;
+  final Function(int)? onDelete;
 
   const TransactionsList({
     super.key,
     required this.transactions,
     required this.isLoading,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -50,11 +61,31 @@ class TransactionsList extends StatelessWidget {
     return Column(
       children: transactions.map((transaction) {
         return TransactionCard(
+          key: ValueKey(transaction.id),
+          id: transaction.id,
           title: transaction.title,
           amount: transaction.amount,
-          category: transaction.category,
+          category: transaction.category.name,
           date: transaction.createdAt,
           isExpense: transaction.type == "saida",
+          onDelete: () {
+            // Lógica para deletar a transação
+            if (onDelete != null) {
+              onDelete!(transaction.id);
+            }
+          },
+          onEdit: () {
+            // Lógica para editar a transação
+            if (onEdit != null) {
+              onEdit!(
+                idTransacao: transaction.id,
+                tittleInicial: transaction.title,
+                precoInicial: transaction.amount,
+                categoriaIdInicial: transaction.category.id,
+                tipoInicial: transaction.type,
+              );
+            }
+          },
         );
       }).toList(),
     );

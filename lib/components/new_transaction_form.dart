@@ -8,10 +8,23 @@ class NewTransactionForm extends StatefulWidget {
   final VoidCallback onClosePressed;
   final Future<void> Function(String, double, int, String) onRegisterPressed;
 
+  final bool isEditMode;
+  final int? transactionId;
+  final String? initialTitle;
+  final double? initialPrice;
+  final int? initialCategoryId;
+  final String? initialType;
+
   const NewTransactionForm({
     super.key,
     required this.onClosePressed,
     required this.onRegisterPressed,
+    this.transactionId,
+    this.initialTitle,
+    this.initialPrice,
+    this.initialCategoryId,
+    this.initialType,
+    this.isEditMode = false,
   });
 
   @override
@@ -35,6 +48,16 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
   @override
   void initState() {
     super.initState();
+    if (widget.isEditMode) {
+      _selectedType = widget.initialType ?? '';
+      _selectedCategoryId = widget.initialCategoryId
+          ?.toString(); // Converte para String
+      _titleController.text = widget.initialTitle ?? '';
+      _priceController.text = widget.initialPrice != null
+          ? widget.initialPrice.toString()
+          : '';
+    }
+
     _titleController.addListener(_onFieldChanged);
     _priceController.addListener(_onFieldChanged);
     _fetchCategories();
@@ -271,7 +294,7 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
                       ),
                     )
                   : Text(
-                      'Cadastrar',
+                      widget.isEditMode ? 'Atualizar' : 'Cadastrar',
                       style: TextStyle(
                         color: isFormValid
                             ? CoresGlobal().textColor
