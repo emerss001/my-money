@@ -1,83 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/components/ui/transaction_card.dart';
-import 'package:my_money/repository/transactions_repository.dart';
+import 'package:my_money/features/transactions/transactions_model.dart';
 
 class TransactionsList extends StatelessWidget {
-  final TransactionsRepository _transactionsRepository =
-      TransactionsRepository();
+  // Recebe a lista via "Props"
+  final List<TransactionModel> transactions;
+  final bool isLoading;
 
-  TransactionsList({super.key});
-
-  Future<Map<String, dynamic>> _fetchData() async {
-    // Simulação de uma chamada de API para obter as transações
-    final data = await _transactionsRepository.obterTransacoes();
-    return {"transactions": data};
-  }
+  const TransactionsList({
+    super.key,
+    required this.transactions,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _fetchData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Padding(
-            padding: EdgeInsets.all(32.0),
-            child: Center(
-              child: CircularProgressIndicator(color: Color(0xFF00B37E)),
-            ),
-          );
-        }
+    if (isLoading) {
+      return const Padding(
+        padding: EdgeInsets.all(32.0),
+        child: Center(
+          child: CircularProgressIndicator(color: Color(0xFF00B37E)),
+        ),
+      );
+    }
 
-        if (snapshot.hasError) {
-          return const Center(
-            child: Text(
-              'Erro ao carregar transações',
-              style: TextStyle(color: Colors.white),
-            ),
-          );
-        }
-
-        final transactions =
-            snapshot.data?['transactions'] as List<dynamic>? ?? [];
-
-        if (transactions.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 64.0),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.description_outlined,
-                    size: 48,
-                    color: Color(0xFF7C7C8A),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Nenhuma transação cadastrada.',
-                    style: TextStyle(color: Color(0xFF7C7C8A), fontSize: 16),
-                  ),
-                ],
+    if (transactions.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 64.0),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.description_outlined,
+                size: 48,
+                color: Color(0xFF7C7C8A),
               ),
-            ),
-          );
-        }
+              SizedBox(height: 16),
+              Text(
+                'Nenhuma transação cadastrada.',
+                style: TextStyle(color: Color(0xFF7C7C8A), fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
-        return Column(
-          children: transactions.map((transaction) {
-            final double amount =
-                (transaction['amount'] as num?)?.toDouble() ?? 0.0;
-
-            return TransactionCard(
-              title: transaction['title'],
-              amount: amount,
-              category: transaction['category'],
-              date: transaction['createdAt'],
-              isExpense: transaction['type'] == "saida",
-            );
-          }).toList(),
+    return Column(
+      children: transactions.map((transaction) {
+        return TransactionCard(
+          title: transaction.title,
+          amount: transaction.amount,
+          category: transaction.category,
+          date: transaction.createdAt,
+          isExpense: transaction.type == "saida",
         );
-      },
+      }).toList(),
     );
   }
 }

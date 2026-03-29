@@ -1,0 +1,97 @@
+enum TransactionType { entrada, saida }
+
+class TransactionModel {
+  final int id;
+  final String title;
+  final double amount;
+  final String createdAt;
+  final TransactionType type;
+  final String category;
+
+  TransactionModel({
+    required this.id,
+    required this.title,
+    required this.amount,
+    required this.createdAt,
+    required this.type,
+    required this.category,
+  });
+
+  factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    return TransactionModel(
+      id: json['id'] as int,
+      title: json['title'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      createdAt: json['createdAt'] as String,
+      type: json['type'] == 'entrada'
+          ? TransactionType.entrada
+          : TransactionType.saida,
+      category: json['category'] as String,
+    );
+  }
+}
+
+class TransactionsMetrics {
+  final EntradaSaidaMetric entradas;
+  final EntradaSaidaMetric saidas;
+  final TotalMetric total;
+
+  TransactionsMetrics({
+    required this.entradas,
+    required this.saidas,
+    required this.total,
+  });
+
+  factory TransactionsMetrics.fromJson(Map<String, dynamic> json) {
+    return TransactionsMetrics(
+      entradas: EntradaSaidaMetric.fromJson(json['entradas']),
+      saidas: EntradaSaidaMetric.fromJson(json['saidas']),
+      total: TotalMetric.fromJson(json['total']),
+    );
+  }
+}
+
+class EntradaSaidaMetric {
+  final double total;
+  final String lastDate;
+
+  EntradaSaidaMetric({required this.total, required this.lastDate});
+
+  factory EntradaSaidaMetric.fromJson(Map<String, dynamic> json) {
+    return EntradaSaidaMetric(
+      total: (json['total'] as num).toDouble(),
+      lastDate: json['lastDate'] as String,
+    );
+  }
+}
+
+class TotalMetric {
+  final double balance;
+  final String firstDate;
+  final String lastDate;
+
+  TotalMetric({
+    required this.balance,
+    required this.firstDate,
+    required this.lastDate,
+  });
+
+  factory TotalMetric.fromJson(Map<String, dynamic> json) {
+    return TotalMetric(
+      balance: (json['balance'] as num).toDouble(),
+      firstDate: json['firstDate'] as String,
+      lastDate: json['lastDate'] as String,
+    );
+  }
+}
+
+class CategoryModel {
+  final int id;
+  final String name;
+
+  CategoryModel({required this.id, required this.name});
+
+  factory CategoryModel.fromJson(Map<String, dynamic> json) {
+    return CategoryModel(id: json['id'] as int, name: json['name'] as String);
+  }
+}

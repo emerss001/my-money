@@ -3,12 +3,24 @@ import 'package:my_money/core/token_service.dart';
 import 'package:my_money/features/auth/auth_repository.dart';
 
 class AuthController {
-  final _repository = AuthRepository();
+  final AuthRepository _repository = AuthRepository();
   final TokenService _tokenService = TokenService();
 
   // estados:
   final isLoading = ValueNotifier<bool>(false);
   final errorMessage = ValueNotifier<String?>(null);
+
+  // função de validação de token
+  Future<bool> validarToken() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+    try {
+      final isValid = await _repository.validarToken();
+      return isValid;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   // Função de login
   Future<bool> realizarLoginEmailSenha(String email, String senha) async {

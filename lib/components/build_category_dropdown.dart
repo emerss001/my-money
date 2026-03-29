@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/assets/styles/cores_global.dart';
-import 'package:my_money/models/categoria.dart';
+import 'package:my_money/features/transactions/transactions_model.dart';
 
 class CategoryDropdown extends StatelessWidget {
   final String? selectedCategoryId;
   final bool isLoadingCategories;
-  final List<Categoria> categorias;
+  final List<CategoryModel> categorias;
   final ValueChanged<String?> onChanged;
 
   const CategoryDropdown({
@@ -62,9 +62,9 @@ class CategoryDropdown extends StatelessWidget {
                   final isSelected = selectedCategoryId == categoria.id;
 
                   return DropdownMenuItem<String>(
-                    value: categoria.id,
+                    value: categoria.id.toString(),
                     child: Text(
-                      categoria.nome,
+                      categoria.name,
                       style: TextStyle(
                         color: CoresGlobal().textColor,
                         fontSize: 16,

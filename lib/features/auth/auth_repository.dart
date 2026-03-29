@@ -5,6 +5,21 @@ import 'package:my_money/features/auth/auth_model.dart';
 class AuthRepository {
   final _dio = ApiClient().dio;
 
+  // função de validação de token
+  Future<bool> validarToken() async {
+    try {
+      final response = await _dio.get("/auth/validate");
+
+      if (response.data) {
+        return true;
+      }
+      return false;
+    } on DioException catch (e) {
+      print('Erro ao validar token: ${e.message}');
+      return false;
+    }
+  }
+
   // função de registro
   Future<AuthModelLogin> realizarRegistroEmailSenha(
     String name,

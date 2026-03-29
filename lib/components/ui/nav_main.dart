@@ -1,51 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:my_money/controller/transactions_controller.dart';
 import 'package:my_money/components/new_transaction_form.dart';
 
 class NavBarMain extends StatelessWidget {
   final String imageUrl;
   final String nomeUsuario;
-  final VoidCallback onProfileUpdated;
+  // final VoidCallback onProfileUpdated;
+  final Function(String title, double amount, int categoryId, String type)
+  onNovaTransacaoSalva;
 
   NavBarMain({
     super.key,
     required this.imageUrl,
     required this.nomeUsuario,
-    required this.onProfileUpdated,
+    // required this.onProfileUpdated,
+    required this.onNovaTransacaoSalva,
   });
 
-  final TransactionsController _transactionsController =
-      TransactionsController();
-
-  // NOVA FUNÇÃO: Abre o modal de nova transação
   void _abrirModalNovaTransacao(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled:
-          true, // Permite que o modal ocupe o tamanho necessário
-      backgroundColor: Colors
-          .transparent, // Deixa o fundo transparente para ver as bordas arredondadas do componente
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return Padding(
-          // Empurra o modal para cima quando o teclado do celular abrir
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           child: NewTransactionForm(
             onClosePressed: () {
-              Navigator.of(context).pop(); // Fecha o modal no botão "X"
+              Navigator.of(context).pop();
             },
             onRegisterPressed: (descricao, preco, categoria, tipo) async {
-              await _transactionsController.criarTransacao(
-                title: descricao,
-                amount: preco,
-                type: tipo,
-                categoryId: categoria,
-              );
+              await onNovaTransacaoSalva(descricao, preco, categoria, tipo);
 
-              // Fecha o modal após salvar
-              Navigator.of(context).pop();
+              if (context.mounted) Navigator.of(context).pop();
             },
           ),
         );
@@ -88,7 +77,7 @@ class NavBarMain extends StatelessWidget {
                 onTap: () async {
                   final result = await Navigator.pushNamed(context, '/profile');
                   if (result == true) {
-                    onProfileUpdated();
+                    // onProfileUpdated();
                   }
                 },
                 child: Padding(

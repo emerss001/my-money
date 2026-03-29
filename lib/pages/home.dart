@@ -3,7 +3,9 @@ import 'package:my_money/assets/styles/cores_global.dart';
 import 'package:my_money/components/transactions_list.dart';
 import 'package:my_money/components/ui/nav_main.dart';
 import 'package:my_money/components/summary_cards_list.dart';
+import 'package:my_money/features/transactions/transactions_controller.dart';
 import 'package:my_money/features/user/user_controller.dart';
+import 'package:my_money/features/user/user_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,15 +15,33 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Key _refreshKey = UniqueKey();
   final UserController _userController = UserController();
+  final TransactionsController _transactionsController =
+      TransactionsController();
 
   String _imageUrl = '';
   String _nomeUsuario = '';
+  bool _isLoading = true;
 
-  Future<void> _loadUserData() async {
+  @override
+  void initState() {
+    super.initState();
+    _carregarHomePageDados();
+  }
+
+  Future<void> _carregarHomePageDados() async {
+    setState(() => _isLoading = true);
+
     try {
-      final userModelMin = await _userController.obterDadosMinPerfil();
+      // fazendo as chamadas em paralelo
+      final results = await Future.wait([
+        _userController.obterDadosMinPerfil(),
+        _transactionsController.obterMetricasGlobais(),
+        _transactionsController.obterTransacoes(),
+      ]);
+
+      // extrair o resultado da primeira chamada
+      final UserModelMin userModelMin = results[0] as UserModelMin;
       if (mounted) {
         setState(() {
           _nomeUsuario = userModelMin.name;
@@ -29,21 +49,30 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      print('Erro ao carregar dados mínimos do perfil: $e');
+      print('Erro ao carregar dados da HomePage: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _handleRefresh() async {
-    setState(() {
-      _refreshKey = UniqueKey();
-    });
-    await _loadUserData();
+  Future<void> _salvarNovaTransacao(
+    String title,
+    double amount,
+    int categoryId,
+    String type,
+  ) async {
+    try {
+      await _transactionsController.criarTransacao(
+        title: title,
+        amount: amount,
+        categoryId: categoryId,
+        type: type,
+      );
+      await _carregarHomePageDados(); // Recarrega os dados da HomePage após criar a transação
+    } catch (e) {
+      print('Erro ao salvar nova transação: $e');
+      throw Exception('Falha ao salvar transação. Tente novamente mais tarde.');
+    }
   }
 
   @override
@@ -53,38 +82,53 @@ class _HomePageState extends State<HomePage> {
         child: RefreshIndicator(
           color: CoresGlobal().primaryColor,
           backgroundColor: CoresGlobal().backgroundColor,
-          onRefresh: _handleRefresh,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              key: _refreshKey,
-              children: [
-                NavBarMain(
-                  imageUrl: _imageUrl,
-                  nomeUsuario: _nomeUsuario,
-                  onProfileUpdated: _loadUserData,
-                ),
-                const SummaryCardsList(),
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 24.0,
-                    right: 24.0,
-                    bottom: 24.0,
-                  ),
+          onRefresh: _carregarHomePageDados,
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
-                      // TODO: Ajustar o itemCount dinamicamente caso seja necessário futuramente
-                      const TransactionsHeader(itemCount: 4),
-                      const SizedBox(height: 16),
-                      const SearchField(),
-                      const SizedBox(height: 24),
-                      TransactionsList(),
+                      NavBarMain(
+                        imageUrl: _imageUrl,
+                        nomeUsuario: _nomeUsuario,
+                        onNovaTransacaoSalva: _salvarNovaTransacao,
+                      ),
+
+                      SummaryCardsList(
+                        metricsData: _transactionsController.metricas.value,
+                        isLoading: _transactionsController.isLoading.value,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 24.0,
+                          right: 24.0,
+                          bottom: 24.0,
+                        ),
+                        child: Column(
+                          children: [
+                            TransactionsHeader(
+                              itemCount: _transactionsController
+                                  .transacoes
+                                  .value
+                                  .length,
+                            ),
+                            const SizedBox(height: 16),
+                            const SearchField(),
+                            const SizedBox(height: 24),
+
+                            TransactionsList(
+                              transactions:
+                                  _transactionsController.transacoes.value,
+                              isLoading:
+                                  _transactionsController.isLoading.value,
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
         ),
       ),
     );

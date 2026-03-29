@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/core/token_service.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:my_money/features/auth/auth_controller.dart';
 
 class AuthCheck extends StatefulWidget {
   const AuthCheck({super.key});
@@ -10,6 +11,8 @@ class AuthCheck extends StatefulWidget {
 }
 
 class _AuthCheckState extends State<AuthCheck> {
+  final AuthController _authController = AuthController();
+
   @override
   void initState() {
     super.initState();
@@ -23,7 +26,13 @@ class _AuthCheckState extends State<AuthCheck> {
 
     if (mounted) {
       if (token != null) {
-        Navigator.pushReplacementNamed(context, "/home");
+        final isValid = await _authController.validarToken();
+
+        if (isValid) {
+          Navigator.pushReplacementNamed(context, "/home");
+        } else {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       } else {
         Navigator.pushReplacementNamed(context, '/login');
       }

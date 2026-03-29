@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:my_money/repository/transactions_repository.dart';
 import 'package:my_money/assets/styles/cores_global.dart';
-import 'package:my_money/models/categoria.dart';
+import 'package:my_money/features/transactions/transactions_controller.dart';
+import 'package:my_money/features/transactions/transactions_model.dart';
 import 'package:my_money/components/build_category_dropdown.dart';
 
 class NewTransactionForm extends StatefulWidget {
   final VoidCallback onClosePressed;
-  // Agora o terceiro parâmetro (String) representará o ID da categoria selecionada
-  final Function(String, double, String, String) onRegisterPressed;
+  final Future<void> Function(String, double, int, String) onRegisterPressed;
 
   const NewTransactionForm({
     super.key,
@@ -20,19 +19,18 @@ class NewTransactionForm extends StatefulWidget {
 }
 
 class _NewTransactionFormState extends State<NewTransactionForm> {
-  final TransactionsRepository _transactionsRepository =
-      TransactionsRepository();
-  // Estado para o tipo de transação ('entrada' ou 'saida')
+  final TransactionsController _transactionsRepository =
+      TransactionsController();
+
   String _selectedType = 'entrada';
   String? _selectedCategoryId;
 
-  // Controladores de texto para os outros campos
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
 
-  // 2. Lista de categorias vinda da API
-  List<Categoria> _categorias = [];
+  List<CategoryModel> _categorias = [];
   bool _isLoadingCategories = true;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -44,20 +42,20 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
 
   Future<void> _fetchCategories() async {
     try {
-      final data = await _transactionsRepository.obterCategorias();
-
-      setState(() {
-        _categorias = data.map((item) {
-          return Categoria(id: item['id'].toString(), nome: item['name']);
-        }).toList();
-
-        _isLoadingCategories = false;
-      });
+      final categorias = await _transactionsRepository.obterCategorias();
+      if (mounted) {
+        setState(() {
+          _categorias = categorias;
+          _isLoadingCategories = false;
+        });
+      }
     } catch (e) {
       print('Erro ao carregar categorias: $e');
-      setState(() {
-        _isLoadingCategories = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingCategories = false;
+        });
+      }
     }
   }
 
@@ -141,10 +139,12 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
 
   @override
   Widget build(BuildContext context) {
+    // 3. ATUALIZADO: O formulário só é válido se também NÃO estiver submetendo
     final bool isFormValid =
-        _titleController.text.isNotEmpty &&
+        _titleController.text.trim().isNotEmpty &&
         double.tryParse(_priceController.text) != null &&
-        _selectedCategoryId != null;
+        _selectedCategoryId != null &&
+        !_isSubmitting;
 
     return Container(
       padding: const EdgeInsets.all(24.0),
@@ -187,7 +187,6 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
           ),
 
-          // Campo Select da Categoria
           CategoryDropdown(
             selectedCategoryId: _selectedCategoryId,
             isLoadingCategories: _isLoadingCategories,
@@ -208,11 +207,7 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
                 text: 'Entrada',
                 color: CoresGlobal().incomeColor,
                 isSelected: _selectedType == 'entrada',
-                onPressed: () {
-                  setState(() {
-                    _selectedType = 'entrada';
-                  });
-                },
+                onPressed: () => setState(() => _selectedType = 'entrada'),
               ),
               const SizedBox(width: 16),
               _buildTypeButton(
@@ -220,35 +215,40 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
                 text: 'Saída',
                 color: CoresGlobal().outcomeColor,
                 isSelected: _selectedType == 'saida',
-                onPressed: () {
-                  setState(() {
-                    _selectedType = 'saida';
-                  });
-                },
+                onPressed: () => setState(() => _selectedType = 'saida'),
               ),
             ],
           ),
 
           const SizedBox(height: 40),
 
+          // 4. ATUALIZADO: Botão Cadastrar com lógica assíncrona
           SizedBox(
             width: double.infinity,
             height: 56,
             child: ElevatedButton(
               onPressed: isFormValid
-                  ? () {
-                      widget.onRegisterPressed(
-                        _titleController.text,
-                        double.parse(_priceController.text),
-                        _selectedCategoryId!,
-                        _selectedType,
-                      );
+                  ? () async {
+                      // Trava o botão e mostra o loading
+                      setState(() => _isSubmitting = true);
 
-                      _titleController.clear();
-                      _priceController.clear();
-                      setState(() {
-                        _selectedCategoryId = null; // Reseta o select
-                      });
+                      try {
+                        // Avisa a HomePage para salvar os dados (convertendo a string do ID para Int)
+                        await widget.onRegisterPressed(
+                          _titleController.text.trim(),
+                          double.parse(_priceController.text),
+                          int.parse(_selectedCategoryId!), // Conversão aqui!
+                          _selectedType,
+                        );
+
+                        // NOTA: Não precisamos limpar os controllers aqui porque
+                        // a NavBarMain vai fechar o modal assim que o await terminar!
+                      } catch (e) {
+                        // Se deu erro na API, destrava o botão para o usuário tentar de novo
+                        if (mounted) {
+                          setState(() => _isSubmitting = false);
+                        }
+                      }
                     }
                   : null,
               style: ElevatedButton.styleFrom(
@@ -260,16 +260,26 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: Text(
-                'Cadastrar',
-                style: TextStyle(
-                  color: isFormValid
-                      ? CoresGlobal().textColor
-                      : CoresGlobal().textColor.withValues(alpha: 0.5),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              // 5. ATUALIZADO: Mostra o CircularProgressIndicator se estiver submetendo
+              child: _isSubmitting
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      'Cadastrar',
+                      style: TextStyle(
+                        color: isFormValid
+                            ? CoresGlobal().textColor
+                            : CoresGlobal().textColor.withValues(alpha: 0.5),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         ],
