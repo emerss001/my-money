@@ -47,9 +47,14 @@ class TransactionsRepository {
   }
 
   // função para buscar transações
-  Future<List<TransactionModel>> obterTransacoes() async {
+  Future<List<TransactionModel>> obterTransacoes({
+    required TransactionsFilters filters,
+  }) async {
     try {
-      final response = await _dio.get("/transactions");
+      final response = await _dio.get(
+        "/transactions",
+        queryParameters: filters.toQueryParameters(),
+      );
       final data = response.data;
       if (data is List && data.isEmpty) {
         return <TransactionModel>[];

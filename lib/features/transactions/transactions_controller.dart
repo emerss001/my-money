@@ -46,12 +46,14 @@ class TransactionsController {
   }
 
   // função de busca de transações
-  Future<List<TransactionModel>> obterTransacoes() async {
+  Future<List<TransactionModel>> obterTransacoes({
+    required TransactionsFilters filters,
+  }) async {
     isLoading.value = true;
     errorMessage.value = null;
 
     try {
-      final transacoes = await _repository.obterTransacoes();
+      final transacoes = await _repository.obterTransacoes(filters: filters);
       this.transacoes.value = transacoes;
       return transacoes;
     } catch (e) {

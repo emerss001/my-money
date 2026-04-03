@@ -125,18 +125,35 @@ class TransactionsHeader extends StatelessWidget {
 
 // Campo de busca para filtrar transações
 class SearchField extends StatelessWidget {
-  const SearchField({super.key});
+  final VoidCallback onFilterPressed;
+  final TextEditingController controller;
+  final Function(String value) onSearchChanged;
+
+  const SearchField({
+    super.key,
+    required this.onFilterPressed,
+    required this.controller,
+    required this.onSearchChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      controller: controller,
       style: const TextStyle(color: Colors.white),
+      onChanged: (value) {
+        onSearchChanged(value);
+      },
       decoration: InputDecoration(
         hintText: 'Busque uma transação',
         hintStyle: const TextStyle(color: Color(0xFF7C7C8A)),
         filled: true,
         fillColor: const Color(0xFF121214), // Fundo interno mais escuro
-        suffixIcon: const Icon(Icons.sort, color: Color(0xFF00B37E)),
+        suffixIcon: IconButton(
+          // Transformei o Icon em IconButton
+          icon: const Icon(Icons.sort, color: Color(0xFF00B37E)),
+          onPressed: onFilterPressed, // Chama a função aqui!
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
           borderSide: const BorderSide(color: Color(0xFF323238)), // Borda sutil

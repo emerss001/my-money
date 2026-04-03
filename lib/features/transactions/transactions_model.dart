@@ -91,3 +91,46 @@ class CategoryModel {
     return CategoryModel(id: json['id'] as int, name: json['name'] as String);
   }
 }
+
+class TransactionsFilters {
+  final DateTime? dataInicio;
+  final DateTime? dataFim;
+  final List<int>? categoriasId;
+  final List<String>? tipos;
+  final String? search;
+
+  TransactionsFilters({
+    this.dataInicio,
+    this.dataFim,
+    this.categoriasId,
+    this.tipos,
+    this.search,
+  });
+
+  bool get isEmpty =>
+      dataInicio == null &&
+      dataFim == null &&
+      categoriasId == null &&
+      tipos == null &&
+      search == null;
+
+  Map<String, dynamic> toQueryParameters() {
+    final Map<String, dynamic> params = {};
+    if (dataInicio != null) {
+      params['dataInicio'] = dataInicio!.toIso8601String();
+    }
+    if (dataFim != null) {
+      params['dataFim'] = dataFim!.toIso8601String();
+    }
+    if (categoriasId != null) {
+      params['categoriasId'] = categoriasId;
+    }
+    if (tipos != null) {
+      params['tipos'] = tipos;
+    }
+    if (search != null) {
+      params['search'] = search;
+    }
+    return params;
+  }
+}

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
 import 'package:my_money/assets/styles/cores_global.dart';
+import 'package:my_money/components/filter_transactions_modal.dart';
 import 'package:my_money/components/new_transaction_form.dart';
 import 'package:my_money/components/transactions_list.dart';
 import 'package:my_money/components/ui/custom_snackbar.dart';
 import 'package:my_money/components/ui/nav_main.dart';
 import 'package:my_money/components/summary_cards_list.dart';
 import 'package:my_money/features/transactions/transactions_controller.dart';
-import 'package:my_money/features/user/user_controller.dart';
-import 'package:my_money/features/user/user_model.dart';
+import 'package:my_money/features/transactions/transactions_model.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,44 +18,65 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final UserController _userController = UserController();
   final TransactionsController _transactionsController =
       TransactionsController();
 
-  String _imageUrl = '';
-  String _nomeUsuario = '';
+  TransactionsFilters _filters = TransactionsFilters();
+
   bool _isLoading = true;
+  // Loading específico para a lista de transações
+  bool _isLoadingTransactions = false;
+  // Loading específico para métricas/resumo
+  bool _isLoadingMetrics = false;
+  // Debounce para busca
+  Timer? _searchDebounce;
+  // Controller do campo de busca
+  late final TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
+    _searchController = TextEditingController(text: _filters.search ?? '');
     _carregarHomePageDados();
   }
 
   Future<void> _carregarHomePageDados() async {
     setState(() => _isLoading = true);
+    // indicamos que as métricas também estão sendo carregadas
+    if (mounted) setState(() => _isLoadingMetrics = true);
 
     try {
-      // fazendo as chamadas em paralelo
-      final results = await Future.wait([
-        _userController.obterDadosMinPerfil(),
+      // fazendo as chamadas em paralelo (perfil agora é buscado pelo NavBarMain)
+      await Future.wait([
         _transactionsController.obterMetricasGlobais(),
-        _transactionsController.obterTransacoes(),
+        _transactionsController.obterTransacoes(filters: _filters),
       ]);
-
-      // extrair o resultado da primeira chamada
-      final UserModelMin userModelMin = results[0] as UserModelMin;
-      if (mounted) {
-        setState(() {
-          _nomeUsuario = userModelMin.name;
-          _imageUrl = userModelMin.imageUrl;
-        });
-      }
     } catch (e) {
       print('Erro ao carregar dados da HomePage: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoadingMetrics = false);
     }
+  }
+
+  // Carrega apenas a lista de transações (usada para buscas/filtros rápidos)
+  Future<void> _carregarTransacoesSomente() async {
+    if (mounted) setState(() => _isLoadingTransactions = true);
+
+    try {
+      await _transactionsController.obterTransacoes(filters: _filters);
+    } catch (e) {
+      print('Erro ao carregar transações: $e');
+    } finally {
+      if (mounted) setState(() => _isLoadingTransactions = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _salvarNovaTransacao(
@@ -182,6 +204,31 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  void _abrirFiltros() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF202024), // Cor do fundo do modal
+      builder: (context) {
+        return FilterTransactionsForm(
+          // Mandamos o filtro atual pro modal saber o que já estava marcado
+          filtrosAtuais: _filters,
+
+          // O Modal chama essa função quando o usuário clica em "Filtrar"
+          onApplyFilters: (novosFiltros) {
+            setState(() {
+              _filters = novosFiltros; // Atualiza o estado da Home
+            });
+            // Atualiza também o campo de busca com o valor do filtro
+            _searchController.text = novosFiltros.search ?? '';
+            // Recarrega apenas a lista de transações (não toda a Home)
+            _carregarTransacoesSomente();
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,14 +244,12 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: [
                       NavBarMain(
-                        imageUrl: _imageUrl,
-                        nomeUsuario: _nomeUsuario,
                         onNovaTransacaoPressed: () => _abrirModalTransacao(),
                       ),
 
                       SummaryCardsList(
                         metricsData: _transactionsController.metricas.value,
-                        isLoading: _transactionsController.isLoading.value,
+                        isLoading: _isLoadingMetrics,
                       ),
                       Padding(
                         padding: const EdgeInsets.only(
@@ -221,14 +266,34 @@ class _HomePageState extends State<HomePage> {
                                   .length,
                             ),
                             const SizedBox(height: 16),
-                            const SearchField(),
+                            SearchField(
+                              controller: _searchController,
+                              onSearchChanged: (value) {
+                                setState(() {
+                                  _filters = TransactionsFilters(
+                                    dataInicio: _filters.dataInicio,
+                                    dataFim: _filters.dataFim,
+                                    categoriasId: _filters.categoriasId,
+                                    tipos: _filters.tipos,
+                                    search: value.isEmpty ? null : value,
+                                  );
+                                });
+
+                                // Debounce: aguarda 300ms após o último caractere
+                                _searchDebounce?.cancel();
+                                _searchDebounce = Timer(
+                                  const Duration(milliseconds: 400),
+                                  () => _carregarTransacoesSomente(),
+                                );
+                              },
+                              onFilterPressed: _abrirFiltros,
+                            ),
                             const SizedBox(height: 24),
 
                             TransactionsList(
                               transactions:
                                   _transactionsController.transacoes.value,
-                              isLoading:
-                                  _transactionsController.isLoading.value,
+                              isLoading: _isLoadingTransactions,
                               onEdit:
                                   ({
                                     int? idTransacao,
