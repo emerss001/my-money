@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/assets/styles/cores_global.dart';
-import 'package:my_money/features/transactions/transactions_controller.dart';
 import 'package:my_money/features/transactions/transactions_model.dart';
+import 'package:my_money/features/transactions/transactions_controller.dart';
 import 'package:my_money/components/build_category_dropdown.dart';
 
 class NewTransactionForm extends StatefulWidget {
   final VoidCallback onClosePressed;
   final Future<void> Function(String, double, int, String) onRegisterPressed;
+  final List<CategoryModel> categorias;
+  final Function(List<CategoryModel>)? onCategoriesLoaded;
 
   final bool isEditMode;
   final int? transactionId;
@@ -19,6 +21,8 @@ class NewTransactionForm extends StatefulWidget {
     super.key,
     required this.onClosePressed,
     required this.onRegisterPressed,
+    required this.categorias,
+    this.onCategoriesLoaded,
     this.transactionId,
     this.initialTitle,
     this.initialPrice,
@@ -60,7 +64,13 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
 
     _titleController.addListener(_onFieldChanged);
     _priceController.addListener(_onFieldChanged);
-    _fetchCategories();
+
+    if (widget.categorias.isNotEmpty) {
+      _categorias = widget.categorias;
+      _isLoadingCategories = false;
+    } else {
+      _fetchCategories();
+    }
   }
 
   Future<void> _fetchCategories() async {
@@ -71,13 +81,12 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
           _categorias = categorias;
           _isLoadingCategories = false;
         });
+        widget.onCategoriesLoaded?.call(categorias);
       }
     } catch (e) {
       print('Erro ao carregar categorias: $e');
       if (mounted) {
-        setState(() {
-          _isLoadingCategories = false;
-        });
+        setState(() => _isLoadingCategories = false);
       }
     }
   }

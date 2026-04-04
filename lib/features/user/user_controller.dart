@@ -56,4 +56,18 @@ class UserController {
       isLoading.value = false;
     }
   }
+
+  // função para buscar imagem de perfil
+  Future<String> obterImagemPerfil() async {
+    isLoading.value = true;
+    try {
+      final user = await UserController().obterPerfilUsuario();
+      return user.imageUrl;
+    } catch (e) {
+      print('Erro ao obter imagem do perfil: $e');
+      return '';
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

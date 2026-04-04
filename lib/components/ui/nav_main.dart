@@ -62,7 +62,7 @@ class _NavBarMainState extends State<NavBarMain> {
                   ),
                   const SizedBox(width: 8),
                   const Text(
-                    'DT Money',
+                    'My Money',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

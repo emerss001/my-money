@@ -6,14 +6,9 @@ import 'dart:io';
 import 'package:my_money/features/user/user_controller.dart';
 
 class AvatarProfile extends StatefulWidget {
-  final String avatarUrl;
   final VoidCallback? onImageUpdated;
 
-  const AvatarProfile({
-    super.key,
-    required this.avatarUrl,
-    this.onImageUpdated,
-  });
+  const AvatarProfile({super.key, this.onImageUpdated});
 
   @override
   State<AvatarProfile> createState() => _AvatarProfileState();
@@ -21,21 +16,43 @@ class AvatarProfile extends StatefulWidget {
 
 class _AvatarProfileState extends State<AvatarProfile> {
   final UserController _userController = UserController();
-  bool _isLoading = false;
+  String _avatarUrl = '';
+
+  Future<void> _fetchAvatarUrl() async {
+    try {
+      final userData = await _userController.obterPerfilUsuario();
+      if (mounted) {
+        setState(() {
+          _avatarUrl = userData.imageUrl;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar avatar: $e');
+    }
+  }
 
   Future<void> onCameraTap(BuildContext context) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      setState(() {
-        _isLoading = true;
-      });
+      final fileLength = await image.length();
+
+      if (fileLength > 16 * 1024 * 1024) {
+        CustomSnackBar.show(
+          context: context,
+          message: "A imagem deve ser menor que 16MB.",
+          isError: true,
+        );
+        return;
+      }
 
       try {
         final success = await _userController.atualizarImagemPerfil(
           File(image.path),
         );
+
+        _fetchAvatarUrl();
 
         if (widget.onImageUpdated != null) {
           widget.onImageUpdated!();
@@ -57,12 +74,14 @@ class _AvatarProfileState extends State<AvatarProfile> {
         }
       } catch (e) {
         print("Erro ao atualizar imagem: $e");
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
       }
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAvatarUrl();
   }
 
   @override
@@ -78,19 +97,19 @@ class _AvatarProfileState extends State<AvatarProfile> {
               color: CoresGlobal().backgroundColor,
               border: Border.all(
                 color: CoresGlobal().primaryColor,
-                width: _isLoading ? 0 : 2,
+                width: _userController.isLoading.value ? 0 : 2,
               ),
             ),
             child: Center(
-              child: _isLoading
+              child: _userController.isLoading.value
                   ? CircularProgressIndicator(color: CoresGlobal().primaryColor)
                   : CircleAvatar(
                       radius: 58,
                       backgroundColor: const Color(0xFF323238),
-                      backgroundImage: widget.avatarUrl.isNotEmpty
-                          ? NetworkImage(widget.avatarUrl)
+                      backgroundImage: _avatarUrl.isNotEmpty
+                          ? NetworkImage(_avatarUrl)
                           : null,
-                      child: widget.avatarUrl.isEmpty
+                      child: _avatarUrl.isEmpty
                           ? const Icon(
                               Icons.person,
                               size: 58,
@@ -100,7 +119,7 @@ class _AvatarProfileState extends State<AvatarProfile> {
                     ),
             ),
           ),
-          if (!_isLoading)
+          if (!_userController.isLoading.value)
             Positioned(
               bottom: 0,
               right: 0,

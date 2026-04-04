@@ -24,14 +24,12 @@ class _HomePageState extends State<HomePage> {
   TransactionsFilters _filters = TransactionsFilters();
 
   bool _isLoading = true;
-  // Loading específico para a lista de transações
   bool _isLoadingTransactions = false;
-  // Loading específico para métricas/resumo
   bool _isLoadingMetrics = false;
-  // Debounce para busca
+
   Timer? _searchDebounce;
-  // Controller do campo de busca
   late final TextEditingController _searchController;
+  List<CategoryModel> _categorias = [];
 
   @override
   void initState() {
@@ -40,13 +38,17 @@ class _HomePageState extends State<HomePage> {
     _carregarHomePageDados();
   }
 
-  Future<void> _carregarHomePageDados() async {
-    setState(() => _isLoading = true);
-    // indicamos que as métricas também estão sendo carregadas
-    if (mounted) setState(() => _isLoadingMetrics = true);
+  Future<void> _carregarHomePageDados({bool showGlobalLoader = true}) async {
+    if (showGlobalLoader) {
+      if (mounted) setState(() => _isLoading = true);
+    }
+    if (mounted)
+      setState(() {
+        _isLoadingMetrics = true;
+        _isLoadingTransactions = true;
+      });
 
     try {
-      // fazendo as chamadas em paralelo (perfil agora é buscado pelo NavBarMain)
       await Future.wait([
         _transactionsController.obterMetricasGlobais(),
         _transactionsController.obterTransacoes(filters: _filters),
@@ -54,8 +56,12 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Erro ao carregar dados da HomePage: $e');
     } finally {
-      if (mounted) setState(() => _isLoading = false);
-      if (mounted) setState(() => _isLoadingMetrics = false);
+      if (mounted)
+        setState(() {
+          if (showGlobalLoader) _isLoading = false;
+          _isLoadingMetrics = false;
+          _isLoadingTransactions = false;
+        });
     }
   }
 
@@ -92,7 +98,9 @@ class _HomePageState extends State<HomePage> {
         categoryId: categoryId,
         type: type,
       );
-      await _carregarHomePageDados(); // Recarrega os dados da HomePage após criar a transação
+      await _carregarHomePageDados(
+        showGlobalLoader: false,
+      ); // Atualiza sem recarregar tela inteira
     } catch (e) {
       print('Erro ao salvar nova transação: $e');
       throw Exception('Falha ao salvar transação. Tente novamente mais tarde.');
@@ -110,7 +118,9 @@ class _HomePageState extends State<HomePage> {
         message: "Transação excluída com sucesso!",
       );
 
-      await _carregarHomePageDados(); // Recarrega os dados da Home
+      await _carregarHomePageDados(
+        showGlobalLoader: false,
+      ); // Atualiza sem recarregar a tela inteira
     } else {
       CustomSnackBar.show(
         context: context,
@@ -145,7 +155,9 @@ class _HomePageState extends State<HomePage> {
         message: "Transação editada com sucesso!",
       );
 
-      await _carregarHomePageDados(); // Recarrega os dados da Home
+      await _carregarHomePageDados(
+        showGlobalLoader: false,
+      ); // Atualiza sem recarregar a tela inteira
     } else {
       CustomSnackBar.show(
         context: context,
@@ -174,6 +186,10 @@ class _HomePageState extends State<HomePage> {
             bottom: MediaQuery.of(context).viewInsets.bottom,
           ),
           child: NewTransactionForm(
+            categorias: _categorias,
+            onCategoriesLoaded: (categoriasCarregadas) {
+              _categorias = categoriasCarregadas;
+            },
             transactionId: idTransacao,
             initialTitle: tittleInicial,
             initialPrice: precoInicial,

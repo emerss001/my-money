@@ -4,7 +4,7 @@ String formattedAmount(double amount) {
   // formata o número para o padrão de moeda brasileiro
   final formatCurrency = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
   // usa o abs() para ignorar o sinal negativo e adicionar depois caso seja despesa
-  return formatCurrency.format(amount.abs());
+  return formatCurrency.format(amount);
 }
 
 String formattedDate(String date) {

@@ -60,3 +60,16 @@ class UserRepository {
     }
   }
 }
+
+// função para buscar imagem do perfil do usuário
+Future<String> obterImagemPerfil() async {
+  try {
+    final response = await ApiClient().dio.get("/users/profile-image");
+    return response.data["imageUrl"];
+  } on DioException catch (e) {
+    print('Erro ao obter imagem do perfil: $e');
+    throw Exception(
+      "Falha ao obter imagem do perfil. Tente novamente mais tarde.",
+    );
+  }
+}

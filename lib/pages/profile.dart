@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/assets/styles/cores_global.dart';
+import 'package:my_money/components/ui/custom_snackbar.dart';
 import 'package:my_money/components/ui/logout_button.dart';
 import 'package:my_money/components/ui/custom_text_field.dart';
 import 'package:my_money/components/ui/avatar_profile.dart';
@@ -15,17 +16,15 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final UserController _userController = UserController();
 
+  bool _imageUpdated = false;
   bool _isLoading = true;
   String? _errorMessage;
-  bool _imageUpdated = false;
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _dateController = TextEditingController(
     text: '-',
   );
-
-  String _avatarUrl = '';
 
   @override
   void initState() {
@@ -34,26 +33,45 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _loadUserData() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
       final user = await _userController.obterPerfilUsuario();
 
-      _nameController.text = user.name;
-      _emailController.text = user.email;
-      _dateController.text = user.createdAt;
-      _avatarUrl = user.imageUrl;
+      if (mounted) {
+        setState(() {
+          _nameController.text = user.name;
+          _emailController.text = user.email;
+          _dateController.text = user.createdAt;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
-      });
+      print('Erro ao carregar dados do perfil: $e');
+
+      if (mounted) {
+        setState(() {
+          _errorMessage =
+              _userController.errorMessage.value ??
+              "Erro ao carregar dados do perfil.";
+        });
+
+        CustomSnackBar.show(
+          context: context,
+          message: "Erro ao carregar dados do perfil.",
+          isError: true,
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -134,10 +152,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 16),
                     // foto do avatar de perfil
                     AvatarProfile(
-                      avatarUrl: _avatarUrl,
                       onImageUpdated: () {
                         _imageUpdated = true;
-                        _loadUserData();
                       },
                     ),
 
