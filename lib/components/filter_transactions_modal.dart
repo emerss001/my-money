@@ -72,17 +72,6 @@ class _FilterTransactionsFormState extends State<FilterTransactionsForm> {
     });
   }
 
-  // Função helper para marcar/desmarcar Checkbox
-  void _toggleListItem(List<String> list, String value) {
-    setState(() {
-      if (list.contains(value)) {
-        list.remove(value);
-      } else {
-        list.add(value);
-      }
-    });
-  }
-
   // Abre o calendário nativo para escolher a data
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(

@@ -159,7 +159,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 48),
 
-                    // campos com as informções do usuário
+                    // campos com as informações do usuário
                     CustomTextField(
                       label: 'NOME',
                       prefixIcon: Icons.person_outline,
