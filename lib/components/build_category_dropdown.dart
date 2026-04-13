@@ -4,14 +4,12 @@ import 'package:my_money/features/transactions/transactions_model.dart';
 
 class CategoryDropdown extends StatelessWidget {
   final String? selectedCategoryId;
-  final bool isLoadingCategories;
   final List<CategoryModel> categorias;
   final ValueChanged<String?> onChanged;
 
   const CategoryDropdown({
     super.key,
     required this.selectedCategoryId,
-    required this.isLoadingCategories,
     required this.categorias,
     required this.onChanged,
   });
@@ -35,20 +33,9 @@ class CategoryDropdown extends StatelessWidget {
           dropdownColor: const Color(0xFF29292E),
           borderRadius: BorderRadius.circular(8),
           elevation: 8,
-          icon: isLoadingCategories
-              ? SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    color: CoresGlobal().primaryColor,
-                    strokeWidth: 2,
-                  ),
-                )
-              : Icon(Icons.keyboard_arrow_down, color: CoresGlobal().hintColor),
+          icon: Icon(Icons.keyboard_arrow_down, color: CoresGlobal().hintColor),
           decoration: InputDecoration(
-            hintText: isLoadingCategories
-                ? 'Carregando categorias...'
-                : 'Categoria',
+            hintText: 'Categoria',
             hintStyle: TextStyle(color: CoresGlobal().hintColor, fontSize: 16),
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(

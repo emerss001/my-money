@@ -36,17 +36,32 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _searchController = TextEditingController(text: _filters.search ?? '');
     _carregarHomePageDados();
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    try {
+      final categorias = await _transactionsController.obterCategorias();
+      if (mounted) {
+        setState(() {
+          _categorias = categorias;
+        });
+      }
+    } catch (e) {
+      print('Erro ao carregar categorias: $e');
+    }
   }
 
   Future<void> _carregarHomePageDados({bool showGlobalLoader = true}) async {
     if (showGlobalLoader) {
       if (mounted) setState(() => _isLoading = true);
     }
-    if (mounted)
+    if (mounted) {
       setState(() {
         _isLoadingMetrics = true;
         _isLoadingTransactions = true;
       });
+    }
 
     try {
       await Future.wait([
@@ -56,12 +71,13 @@ class _HomePageState extends State<HomePage> {
     } catch (e) {
       print('Erro ao carregar dados da HomePage: $e');
     } finally {
-      if (mounted)
+      if (mounted) {
         setState(() {
           if (showGlobalLoader) _isLoading = false;
           _isLoadingMetrics = false;
           _isLoadingTransactions = false;
         });
+      }
     }
   }
 
@@ -227,6 +243,7 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: const Color(0xFF202024), // Cor do fundo do modal
       builder: (context) {
         return FilterTransactionsForm(
+          categorias: _categorias,
           // Mandamos o filtro atual pro modal saber o que já estava marcado
           filtrosAtuais: _filters,
 

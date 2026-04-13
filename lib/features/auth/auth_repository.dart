@@ -62,7 +62,7 @@ class AuthRepository {
 
       return AuthModelLogin.fromJson(response.data);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
+      if (e.response?.statusCode == 400 || e.response?.statusCode == 401) {
         throw Exception(
           "Credenciais inválidas. Por favor, verifique seu email e senha.",
         );

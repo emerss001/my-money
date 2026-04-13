@@ -124,7 +124,7 @@ class _NavBarMainState extends State<NavBarMain> {
             ],
           ),
 
-          // Botão Nova Transação (ATUALIZADO)
+          // Botão Nova Transação
           ElevatedButton(
             onPressed: widget.onNovaTransacaoPressed,
             style: ElevatedButton.styleFrom(

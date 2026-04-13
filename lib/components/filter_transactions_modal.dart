@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/assets/styles/cores_global.dart';
-import 'package:my_money/features/transactions/transactions_controller.dart';
 import 'package:my_money/features/transactions/transactions_model.dart';
 import 'package:my_money/helpers/formatters.dart';
 
 class FilterTransactionsForm extends StatefulWidget {
+  final List<CategoryModel> categorias;
   final TransactionsFilters filtrosAtuais;
   final Function(TransactionsFilters) onApplyFilters;
 
@@ -12,6 +12,7 @@ class FilterTransactionsForm extends StatefulWidget {
     super.key,
     required this.filtrosAtuais,
     required this.onApplyFilters,
+    required this.categorias,
   });
 
   @override
@@ -19,12 +20,6 @@ class FilterTransactionsForm extends StatefulWidget {
 }
 
 class _FilterTransactionsFormState extends State<FilterTransactionsForm> {
-  final TransactionsController _transactionsRepository =
-      TransactionsController();
-
-  List<CategoryModel> _categorias = [];
-  bool _isLoadingCategories = true;
-
   DateTime? _dataInicio;
   DateTime? _dataFim;
   List<int>? _categoriasSelecionadas = [];
@@ -39,27 +34,6 @@ class _FilterTransactionsFormState extends State<FilterTransactionsForm> {
       widget.filtrosAtuais.categoriasId ?? [],
     );
     _tiposSelecionados = List.from(widget.filtrosAtuais.tipos ?? []);
-
-    _fetchCategories();
-  }
-
-  Future<void> _fetchCategories() async {
-    try {
-      final categorias = await _transactionsRepository.obterCategorias();
-      if (mounted) {
-        setState(() {
-          _categorias = categorias;
-          _isLoadingCategories = false;
-        });
-      }
-    } catch (e) {
-      print('Erro ao carregar categorias: $e');
-      if (mounted) {
-        setState(() {
-          _isLoadingCategories = false;
-        });
-      }
-    }
   }
 
   // Função para limpar tudo
@@ -246,20 +220,7 @@ class _FilterTransactionsFormState extends State<FilterTransactionsForm> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _isLoadingCategories
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          child: SizedBox(
-                            width: 32,
-                            height: 32,
-                            child: CircularProgressIndicator(
-                              color: CoresGlobal().primaryColor,
-                            ),
-                          ),
-                        ),
-                      )
-                    : _categorias.isEmpty
+                widget.categorias.isEmpty
                     ? Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Text(
@@ -274,7 +235,7 @@ class _FilterTransactionsFormState extends State<FilterTransactionsForm> {
                         constraints: const BoxConstraints(maxHeight: 200),
                         child: SingleChildScrollView(
                           child: Column(
-                            children: _categorias.map((cat) {
+                            children: widget.categorias.map((cat) {
                               return _buildCheckbox(
                                 cat.name, // Mostra o nome, mas salva o ID
                                 _categoriasSelecionadas?.contains(cat.id) ??

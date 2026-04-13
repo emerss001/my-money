@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_money/assets/styles/cores_global.dart';
 import 'package:my_money/features/transactions/transactions_model.dart';
-import 'package:my_money/features/transactions/transactions_controller.dart';
 import 'package:my_money/components/build_category_dropdown.dart';
 
 class NewTransactionForm extends StatefulWidget {
@@ -36,17 +35,12 @@ class NewTransactionForm extends StatefulWidget {
 }
 
 class _NewTransactionFormState extends State<NewTransactionForm> {
-  final TransactionsController _transactionsRepository =
-      TransactionsController();
-
   String _selectedType = 'entrada';
   String? _selectedCategoryId;
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
 
-  List<CategoryModel> _categorias = [];
-  bool _isLoadingCategories = true;
   bool _isSubmitting = false;
 
   @override
@@ -64,31 +58,6 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
 
     _titleController.addListener(_onFieldChanged);
     _priceController.addListener(_onFieldChanged);
-
-    if (widget.categorias.isNotEmpty) {
-      _categorias = widget.categorias;
-      _isLoadingCategories = false;
-    } else {
-      _fetchCategories();
-    }
-  }
-
-  Future<void> _fetchCategories() async {
-    try {
-      final categorias = await _transactionsRepository.obterCategorias();
-      if (mounted) {
-        setState(() {
-          _categorias = categorias;
-          _isLoadingCategories = false;
-        });
-        widget.onCategoriesLoaded?.call(categorias);
-      }
-    } catch (e) {
-      print('Erro ao carregar categorias: $e');
-      if (mounted) {
-        setState(() => _isLoadingCategories = false);
-      }
-    }
   }
 
   void _onFieldChanged() {
@@ -221,8 +190,7 @@ class _NewTransactionFormState extends State<NewTransactionForm> {
 
           CategoryDropdown(
             selectedCategoryId: _selectedCategoryId,
-            isLoadingCategories: _isLoadingCategories,
-            categorias: _categorias,
+            categorias: widget.categorias,
             onChanged: (String? newValue) {
               setState(() {
                 _selectedCategoryId = newValue;
