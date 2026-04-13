@@ -82,8 +82,7 @@ O aplicativo baseia-se em uma paleta de cores foca no contraste e conforto visua
     ```bash
     flutter pub get
     ```
-4. Verifique as configurações de ambiente ou crie as chaves de API necessárias no arquivo base (caso houver).
-5. Execute o aplicativo em um emulador ou dispositivo físico:
+4. Execute o aplicativo em um emulador ou dispositivo físico:
     ```bash
     flutter run
     ```
