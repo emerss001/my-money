@@ -70,4 +70,20 @@ class UserController {
       isLoading.value = false;
     }
   }
+
+  // função para excluir conta
+  Future<bool> excluirConta() async {
+    isLoading.value = true;
+    errorMessage.value = null;
+
+    try {
+      await _repository.excluirConta();
+      return true;
+    } catch (e) {
+      errorMessage.value = e.toString().replaceAll('Exception: ', '');
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

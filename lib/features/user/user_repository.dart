@@ -59,6 +59,16 @@ class UserRepository {
       );
     }
   }
+
+  // função para excluir a conta do usuário
+  Future<void> excluirConta() async {
+    try {
+      await _dio.delete("/users", data: {});
+    } on DioException catch (e) {
+      print('Erro ao excluir conta: $e');
+      throw Exception("Falha ao excluir conta. Tente novamente mais tarde.");
+    }
+  }
 }
 
 // função para buscar imagem do perfil do usuário

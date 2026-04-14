@@ -5,6 +5,8 @@ import 'package:my_money/components/ui/logout_button.dart';
 import 'package:my_money/components/ui/custom_text_field.dart';
 import 'package:my_money/components/ui/avatar_profile.dart';
 import 'package:my_money/features/user/user_controller.dart';
+import 'package:my_money/core/token_service.dart';
+import 'package:my_money/components/confirm_delete_account.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -30,6 +32,40 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _loadUserData();
+  }
+
+  Future<void> _excluirConta() async {
+    final confirmar = await mostrarModalConfirmacaoExclusaoConta(context);
+
+    if (confirmar == true && mounted) {
+      try {
+        await _userController.excluirConta();
+
+        final tokenService = TokenService();
+        await tokenService.removerToken();
+
+        if (mounted) {
+          CustomSnackBar.show(
+            context: context,
+            message: 'Conta excluída com sucesso!',
+          );
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/login',
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          CustomSnackBar.show(
+            context: context,
+            message:
+                _userController.errorMessage.value ?? "Erro ao excluir conta.",
+            isError: true,
+          );
+        }
+      }
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -164,6 +200,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       label: 'NOME',
                       prefixIcon: Icons.person_outline,
                       controller: _nameController,
+                      readOnly: true,
                     ),
 
                     CustomTextField(
@@ -192,9 +229,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       width: double.infinity,
                       height: 56,
                       child: TextButton.icon(
-                        onPressed: () {
-                          print("Excluir conta");
-                        },
+                        onPressed: _excluirConta,
                         icon: Icon(
                           Icons.delete_outline,
                           color: CoresGlobal().outcomeColor,
