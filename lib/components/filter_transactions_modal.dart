@@ -46,6 +46,15 @@ class _FilterTransactionsFormState extends State<FilterTransactionsForm> {
     });
   }
 
+  // Verifica se há algum filtro ativado
+  bool get _hasActiveFilters {
+    return _dataInicio != null ||
+        _dataFim != null ||
+        (_categoriasSelecionadas != null &&
+            _categoriasSelecionadas!.isNotEmpty) ||
+        (_tiposSelecionados != null && _tiposSelecionados!.isNotEmpty);
+  }
+
   // Abre o calendário nativo para escolher a data
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final DateTime? picked = await showDatePicker(
@@ -156,200 +165,216 @@ class _FilterTransactionsFormState extends State<FilterTransactionsForm> {
             color: CoresGlobal().backgroundColor,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: SingleChildScrollView(
-            controller: scrollController,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: CoresGlobal().borderColor,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+          child: Column(
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: CoresGlobal().borderColor,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                const SizedBox(height: 24),
-                // CABEÇALHO
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Filtrar transações',
-                      style: TextStyle(
-                        color: CoresGlobal().textColor,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 24),
+              // CABEÇALHO
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Filtrar transações',
+                    style: TextStyle(
+                      color: CoresGlobal().textColor,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close, color: CoresGlobal().hintColor),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // SEÇÃO DE DATAS
+                      Text(
+                        'Data',
+                        style: TextStyle(
+                          color: CoresGlobal().hintColor,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.close, color: CoresGlobal().hintColor),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                // SEÇÃO DE DATAS
-                Text(
-                  'Data',
-                  style: TextStyle(
-                    color: CoresGlobal().hintColor,
-                    fontSize: 14,
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildDateField('De', _dataInicio, true),
+                          ),
+                          const SizedBox(width: 24),
+                          Expanded(
+                            child: _buildDateField('Até', _dataFim, false),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 32),
+                      // SEÇÃO DE CATEGORIAS
+                      Text(
+                        'Categoria',
+                        style: TextStyle(
+                          color: CoresGlobal().hintColor,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      widget.categorias.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              child: Text(
+                                'Nenhuma categoria encontrada.',
+                                style: TextStyle(
+                                  color: CoresGlobal().hintColor,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            )
+                          : Column(
+                              children: widget.categorias.map((cat) {
+                                return _buildCheckbox(
+                                  cat.name, // Mostra o nome, mas salva o ID
+                                  _categoriasSelecionadas?.contains(cat.id) ??
+                                      false,
+                                  (bool? checked) {
+                                    setState(() {
+                                      if (checked == true) {
+                                        _categoriasSelecionadas?.add(
+                                          cat.id,
+                                        ); // Salva o ID
+                                      } else {
+                                        _categoriasSelecionadas?.remove(cat.id);
+                                      }
+                                    });
+                                  },
+                                );
+                              }).toList(),
+                            ),
+                      const SizedBox(height: 24),
+                      // SEÇÃO DE TIPO
+                      Text(
+                        'Tipo',
+                        style: TextStyle(
+                          color: CoresGlobal().hintColor,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildCheckbox(
+                        'Entrada',
+                        _tiposSelecionados?.contains('entrada') ?? false,
+                        (checked) {
+                          setState(() {
+                            checked == true
+                                ? _tiposSelecionados?.add('entrada')
+                                : _tiposSelecionados?.remove('entrada');
+                          });
+                        },
+                      ),
+                      _buildCheckbox(
+                        'Saída',
+                        _tiposSelecionados?.contains('saida') ?? false,
+                        (checked) {
+                          setState(() {
+                            checked == true
+                                ? _tiposSelecionados?.add('saida')
+                                : _tiposSelecionados?.remove('saida');
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(child: _buildDateField('De', _dataInicio, true)),
-                    const SizedBox(width: 24),
-                    Expanded(child: _buildDateField('Até', _dataFim, false)),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                // SEÇÃO DE CATEGORIAS
-                Text(
-                  'Categoria',
-                  style: TextStyle(
-                    color: CoresGlobal().hintColor,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                widget.categorias.isEmpty
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              const SizedBox(height: 16),
+              // BOTÕES DE AÇÃO
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 56,
+                      child: OutlinedButton(
+                        onPressed: _hasActiveFilters
+                            ? () {
+                                // Limpa os filtros locais, fecha o modal e aplica filtros vazios
+                                _limparFiltros();
+                                widget.onApplyFilters(TransactionsFilters());
+                                Navigator.pop(context);
+                              }
+                            : null,
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: _hasActiveFilters
+                                ? CoresGlobal().primaryColor
+                                : CoresGlobal().hintColor.withValues(
+                                    alpha: 0.5,
+                                  ),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
                         child: Text(
-                          'Nenhuma categoria encontrada.',
+                          'Limpar filtro',
                           style: TextStyle(
-                            color: CoresGlobal().hintColor,
+                            color: _hasActiveFilters
+                                ? CoresGlobal().primaryColor
+                                : CoresGlobal().hintColor,
                             fontSize: 16,
                           ),
                         ),
-                      )
-                    : ConstrainedBox(
-                        constraints: const BoxConstraints(maxHeight: 200),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: widget.categorias.map((cat) {
-                              return _buildCheckbox(
-                                cat.name, // Mostra o nome, mas salva o ID
-                                _categoriasSelecionadas?.contains(cat.id) ??
-                                    false,
-                                (bool? checked) {
-                                  setState(() {
-                                    if (checked == true) {
-                                      _categoriasSelecionadas?.add(
-                                        cat.id,
-                                      ); // Salva o ID
-                                    } else {
-                                      _categoriasSelecionadas?.remove(cat.id);
-                                    }
-                                  });
-                                },
-                              );
-                            }).toList(),
-                          ),
-                        ),
                       ),
-                const SizedBox(height: 24),
-                // SEÇÃO DE TIPO
-                Text(
-                  'Tipo',
-                  style: TextStyle(
-                    color: CoresGlobal().hintColor,
-                    fontSize: 14,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                _buildCheckbox(
-                  'Entrada',
-                  _tiposSelecionados?.contains('entrada') ?? false,
-                  (checked) {
-                    setState(() {
-                      checked == true
-                          ? _tiposSelecionados?.add('entrada')
-                          : _tiposSelecionados?.remove('entrada');
-                    });
-                  },
-                ),
-                _buildCheckbox(
-                  'Saída',
-                  _tiposSelecionados?.contains('saida') ?? false,
-                  (checked) {
-                    setState(() {
-                      checked == true
-                          ? _tiposSelecionados?.add('saida')
-                          : _tiposSelecionados?.remove('saida');
-                    });
-                  },
-                ),
-                const SizedBox(height: 40),
-                // BOTÕES DE AÇÃO
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: 56,
-                        child: OutlinedButton(
-                          onPressed: () {
-                            // Limpa os filtros locais, fecha o modal e aplica filtros vazios
-                            _limparFiltros();
-                            widget.onApplyFilters(TransactionsFilters());
-                            Navigator.pop(context);
-                          },
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: CoresGlobal().primaryColor),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          final novosFiltros = TransactionsFilters(
+                            dataInicio: _dataInicio,
+                            dataFim: _dataFim,
+                            categoriasId: _categoriasSelecionadas,
+                            tipos: _tiposSelecionados,
+                          );
+                          widget.onApplyFilters(novosFiltros);
+                          Navigator.pop(context);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CoresGlobal().primaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          child: Text(
-                            'Limpar filtro',
-                            style: TextStyle(
-                              color: CoresGlobal().primaryColor,
-                              fontSize: 16,
-                            ),
-                          ),
+                        ),
+                        child: const Text(
+                          'Filtrar',
+                          style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: SizedBox(
-                        height: 56,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            final novosFiltros = TransactionsFilters(
-                              dataInicio: _dataInicio,
-                              dataFim: _dataFim,
-                              categoriasId: _categoriasSelecionadas,
-                              tipos: _tiposSelecionados,
-                            );
-                            widget.onApplyFilters(novosFiltros);
-                            Navigator.pop(context);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: CoresGlobal().primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                          ),
-                          child: const Text(
-                            'Filtrar',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         );
       },
