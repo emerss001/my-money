@@ -86,3 +86,8 @@ O aplicativo baseia-se em uma paleta de cores foca no contraste e conforto visua
     ```bash
     flutter run
     ```
+
+
+---
+
+Feito por [Emerson Neves](https://www.devemerson.site)
